@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #1f3b32;
+    --bg-alt: #16281f;
+    --paper: #f2ead9;
+    --paper-2: #e8ddc4;
+    --ink: #202a22;
+    --ink-soft: #5b6b5f;
+    --gold: #c9973f;
+    --rust: #b25139;
+    --green-ok: #3f7a5c;
+    --line: rgba(32,42,34,0.14);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0; padding:0;}
+  body{
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 20% 0%, rgba(255,255,255,0.05), transparent 40%),
+      radial-gradient(circle at 100% 100%, rgba(0,0,0,0.15), transparent 50%);
+    font-family: 'Inter', sans-serif;
+    color: var(--paper);
+    min-height: 100vh;
+    display:flex;
+    justify-content:center;
+  }
+  #app{
+    width:100%;
+    max-width:480px;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+    padding-bottom: 96px;
+  }
+
+  /* ---- Header ---- */
+  header.top{
+    padding: 28px 20px 18px;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .eyebrow-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color: rgba(242,234,217,0.55);
+  }
+  .sync-badge{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.04em;
+    color: rgba(242,234,217,0.45);
+  }
+  .sync-badge.saving{ color: var(--gold); }
+  .sync-badge.saved{ color: rgba(242,234,217,0.45); }
+  .sync-badge.error{ color: #e08a6f; }
+  h1.month{
+    font-family:'Zilla Slab', serif;
+    font-weight:600;
+    font-size:30px;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+  .total-row{
+    margin-top:14px;
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+  }
+  .total-label{
+    font-size:13px;
+    color: rgba(242,234,217,0.6);
+  }
+  .total-amt{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:22px;
+    font-weight:600;
+  }
+
+  /* ---- Tabs ---- */
+  nav.tabs{
+    display:flex;
+    gap:6px;
+    padding: 4px 20px 16px;
+  }
+  nav.tabs button{
+    font-family:'Inter', sans-serif;
+    font-size:13px;
+    font-weight:600;
+    padding:8px 14px;
+    border-radius:999px;
+    border:1px solid rgba(242,234,217,0.25);
+    background: transparent;
+    color: rgba(242,234,217,0.7);
+    cursor:pointer;
+  }
+  nav.tabs button.active{
+    background: var(--paper);
+    color: var(--ink);
+    border-color: var(--paper);
+  }
+
+  main{
+    flex:1;
+    padding: 4px 16px 20px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+
+  /* ---- Envelope card (signature element) ---- */
+  .envelope{
+    position:relative;
+    background: var(--paper);
+    color: var(--ink);
+    border-radius: 14px;
+    padding: 20px 18px 16px;
+    cursor:pointer;
+    overflow:hidden;
+    border: 1px solid rgba(0,0,0,0.06);
+    transition: transform .12s ease;
+  }
+  .envelope:active{ transform: scale(0.98); }
+  .envelope::before{
+    /* flap */
+    content:"";
+    position:absolute;
+    top:0; left:0; right:0;
+    height:46px;
+    background: linear-gradient(135deg, transparent 49.3%, rgba(0,0,0,0.05) 49.3% 50.7%, transparent 50.7%),
+                linear-gradient(45deg, transparent 49.3%, rgba(0,0,0,0.05) 49.3% 50.7%, transparent 50.7%);
+    pointer-events:none;
+  }
+  .env-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    position:relative;
+    z-index:1;
+  }
+  .env-name{
+    font-family:'Zilla Slab', serif;
+    font-weight:600;
+    font-size:19px;
+  }
+  .env-type{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    padding: 3px 8px;
+    border-radius: 999px;
+    margin-top:3px;
+    display:inline-block;
+  }
+  .env-type.rollover{ background: rgba(201,151,63,0.18); color:#8a6222; }
+  .env-type.reset{ background: rgba(63,122,94,0.16); color:#2c5c43; }
+
+  .env-balance{
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:600;
+    font-size:26px;
+    text-align:right;
+  }
+  .env-balance.low{ color: var(--rust); }
+
+  .env-bottom{
+    margin-top:14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-top: 1px dashed rgba(32,42,34,0.22);
+    padding-top:10px;
+  }
+  .env-budget{
+    font-size:12px;
+    color: var(--ink-soft);
+  }
+  .env-bar{
+    flex:1;
+    height:5px;
+    background: rgba(32,42,34,0.1);
+    border-radius:3px;
+    margin-left:12px;
+    overflow:hidden;
+  }
+  .env-bar-fill{
+    height:100%;
+    border-radius:3px;
+    background: var(--green-ok);
+  }
+
+  .empty-state{
+    text-align:center;
+    padding: 60px 24px;
+    color: rgba(242,234,217,0.6);
+  }
+  .empty-state h2{
+    font-family:'Zilla Slab', serif;
+    color: var(--paper);
+    margin-bottom:8px;
+  }
+  .empty-state button{
+    margin-top:16px;
+  }
+
+  /* ---- History ---- */
+  .tx-row{
+    background: var(--paper);
+    color: var(--ink);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+  }
+  .tx-info .tx-cat{ font-weight:600; font-size:14px; }
+  .tx-info .tx-note{ font-size:12px; color: var(--ink-soft); margin-top:2px; }
+  .tx-info .tx-date{ font-family:'IBM Plex Mono', monospace; font-size:10px; color: var(--ink-soft); margin-top:4px; }
+  .tx-amt{ font-family:'IBM Plex Mono', monospace; font-weight:600; color: var(--rust); white-space:nowrap; }
+  .tx-del{
+    background:none; border:none; color: var(--ink-soft); font-size:16px; cursor:pointer; padding:4px 6px;
+  }
+
+  /* ---- Settings ---- */
+  .settings-card{
+    background: var(--paper);
+    color: var(--ink);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+  .settings-card + .settings-card{ margin-top: 10px; }
+  .set-row{ display:flex; align-items:center; gap:10px; }
+  .set-row input[type=text]{
+    font-family:'Zilla Slab', serif;
+    font-size:16px;
+    font-weight:600;
+    border:none; background:transparent; color:var(--ink);
+    flex:1; padding:2px 0;
+    border-bottom: 1px solid transparent;
+  }
+  .set-row input[type=text]:focus{ outline:none; border-bottom:1px solid var(--ink-soft); }
+  .set-sub{ display:flex; gap:14px; margin-top:8px; align-items:center; flex-wrap:wrap;}
+  .set-sub label{ font-size:12px; color:var(--ink-soft); display:flex; align-items:center; gap:5px;}
+  .amt-input{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    border:1px solid rgba(32,42,34,0.2);
+    border-radius:6px;
+    padding:5px 7px;
+    width:90px;
+    background:#fff;
+    color:var(--ink);
+  }
+  .type-toggle{
+    display:flex; gap:4px;
+  }
+  .type-toggle button{
+    font-size:11px;
+    font-family:'IBM Plex Mono', monospace;
+    padding:4px 8px;
+    border-radius:6px;
+    border:1px solid rgba(32,42,34,0.2);
+    background:transparent;
+    color: var(--ink-soft);
+    cursor:pointer;
+  }
+  .type-toggle button.on{
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+  .del-cat{
+    background:none;border:none;color:var(--rust);font-size:13px;cursor:pointer;
+    margin-left:auto;
+  }
+  .bal-row{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-top:10px; padding-top:10px;
+    border-top: 1px dashed rgba(32,42,34,0.16);
+  }
+  .bal-current{
+    font-size:12px; color: var(--ink-soft);
+  }
+  .bal-current b{
+    font-family:'IBM Plex Mono', monospace;
+    color: var(--ink);
+    font-size:13px;
+  }
+  .adjust-link{
+    background:none; border:none; color:#8a6222; font-size:12px; font-weight:700;
+    cursor:pointer; text-decoration:underline;
+  }
+  .warn-box{
+    background: rgba(178,81,57,0.1);
+    border: 1px solid rgba(178,81,57,0.35);
+    color: #7a3423;
+    border-radius:10px;
+    padding:12px 14px;
+    font-size:13px;
+    line-height:1.45;
+    margin-bottom:14px;
+  }
+  .warn-box b{ display:block; margin-bottom:4px; color: var(--rust); }
+  .tx-row.adjustment .tx-amt.pos{ color: var(--green-ok); }
+
+  button.primary{
+    background: var(--gold);
+    color: #2b1e08;
+    border:none;
+    font-family:'Inter', sans-serif;
+    font-weight:700;
+    font-size:14px;
+    padding: 12px 18px;
+    border-radius: 10px;
+    cursor:pointer;
+  }
+  button.ghost{
+    background: transparent;
+    color: var(--paper);
+    border: 1px solid rgba(242,234,217,0.3);
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:13px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    cursor:pointer;
+  }
+  .add-cat-btn{
+    width:100%;
+    padding:14px;
+    border-radius:12px;
+    border: 1px dashed rgba(242,234,217,0.35);
+    background:transparent;
+    color: rgba(242,234,217,0.75);
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    cursor:pointer;
+  }
+
+  /* ---- FAB ---- */
+  .fab{
+    position:fixed;
+    bottom:24px;
+    left:50%;
+    transform: translateX(calc(-50% + 0px));
+    max-width:480px;
+    width:calc(100% - 32px);
+    display:flex;
+    justify-content:center;
+    pointer-events:none;
+  }
+  .fab button{
+    pointer-events:all;
+    background: var(--gold);
+    color:#2b1e08;
+    border:none;
+    font-family:'Inter', sans-serif;
+    font-weight:700;
+    font-size:15px;
+    padding: 15px 26px;
+    border-radius: 999px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+
+  /* ---- Sheet / modal ---- */
+  .overlay{
+    position:fixed; inset:0;
+    background: rgba(15,22,17,0.55);
+    display:flex; align-items:flex-end; justify-content:center;
+    z-index:50;
+  }
+  .sheet{
+    background: var(--paper);
+    color: var(--ink);
+    width:100%;
+    max-width:480px;
+    border-radius: 20px 20px 0 0;
+    padding: 22px 20px 28px;
+    animation: rise .18s ease-out;
+  }
+  @keyframes rise{ from{ transform: translateY(16px); opacity:0;} to{ transform:none; opacity:1;} }
+  .sheet h2{
+    font-family:'Zilla Slab', serif;
+    margin: 0 0 16px;
+    font-size:21px;
+  }
+  .field{ margin-bottom:14px; }
+  .field label{
+    display:block; font-size:12px; color: var(--ink-soft); margin-bottom:6px;
+    text-transform:uppercase; letter-spacing:0.06em; font-family:'IBM Plex Mono', monospace;
+  }
+  .cat-pick{
+    display:flex; flex-wrap:wrap; gap:8px;
+  }
+  .cat-pick button{
+    padding: 9px 13px;
+    border-radius: 10px;
+    border: 1px solid rgba(32,42,34,0.18);
+    background:#fff;
+    font-size:13px;
+    font-weight:600;
+    color: var(--ink);
+    cursor:pointer;
+  }
+  .cat-pick button.sel{
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+  .amt-big{
+    width:100%;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:32px;
+    font-weight:600;
+    border:none;
+    border-bottom: 2px solid rgba(32,42,34,0.18);
+    background:transparent;
+    padding: 6px 0;
+    color:var(--ink);
+  }
+  .amt-big:focus{ outline:none; border-color: var(--gold); }
+  .note-in{
+    width:100%;
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+    border:1px solid rgba(32,42,34,0.18);
+    border-radius:8px;
+    padding:10px 12px;
+    background:#fff;
+    color:var(--ink);
+  }
+  .sheet-actions{ display:flex; gap:10px; margin-top:8px; }
+  .sheet-actions button.primary{ flex:1; }
+  .sheet-actions button.ghost-dark{
+    background:transparent; border:1px solid rgba(32,42,34,0.2); color: var(--ink);
+    font-weight:600; padding:12px 16px; border-radius:10px; cursor:pointer;
+  }
+  .err{ color: var(--rust); font-size:12px; margin-top:-6px; margin-bottom:10px; }
+  .month-note{
+    font-size:12px;
+    color: rgba(242,234,217,0.55);
+    padding: 0 20px 8px;
+  }
+  .setup-wrap{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 24px 20px;
+  }
+  .setup-card{
+    background: var(--paper);
+    color: var(--ink);
+    border-radius: 16px;
+    padding: 26px 22px;
+    width:100%;
+    max-width:400px;
+  }
+</style>
+</head>
+<body>
+<div id="app"><div class="empty-state"><h2>Loading…</h2></div></div>
+
+<script>
+const STORAGE_KEY = 'household-budget-v1';
+const CONFIG_KEY = 'household-budget-config';
+
+let state = {
+  categories: [],
+  transactions: [],
+  lastMonthProcessed: null
+};
+let activeTab = 'home';
+let sheet = null; // {type:'log'|'addcat', ...}
+let loaded = false;
+let config = null; // { url, token }
+let syncState = 'idle'; // idle | saving | saved | error
+let pollTimer = null;
+let setupMode = false;
+let setupError = '';
+let setupTesting = false;
+
+const DEFAULT_CATEGORIES = [
+  { name: 'Groceries', type: 'reset', amount: 0 },
+  { name: 'Gas', type: 'reset', amount: 0 },
+  { name: 'Personal Funds', type: 'rollover', amount: 0 },
+  { name: 'Food Storage', type: 'rollover', amount: 0 },
+  { name: 'Home Improvement', type: 'rollover', amount: 0 },
+  { name: 'Vacation', type: 'rollover', amount: 0 },
+];
+
+function uid(){ return Math.random().toString(36).slice(2,10); }
+function currentYM(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+}
+function monthLabel(){
+  return new Date().toLocaleString('en-US', { month:'long', year:'numeric' });
+}
+function fmt(n){
+  const neg = n < 0;
+  const v = Math.abs(n).toFixed(2);
+  return (neg?'-':'') + '$' + v;
+}
+
+/* ---------- Config (Google Sheet connection) ---------- */
+function getConfig(){
+  try{
+    const raw = localStorage.getItem(CONFIG_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e){ return null; }
+}
+function saveConfig(cfg){
+  localStorage.setItem(CONFIG_KEY, JSON.stringify(cfg));
+  config = cfg;
+}
+function clearConfig(){
+  localStorage.removeItem(CONFIG_KEY);
+  config = null;
+}
+
+function openReconnect(){
+  setupMode = true;
+  setupError = '';
+  render();
+}
+
+function renderSetupScreen(){
+  const existing = getConfig();
+  return `
+    <div class="setup-wrap">
+      <div class="setup-card">
+        <div class="eyebrow" style="margin-bottom:6px;">Household Ledger</div>
+        <h1 class="month" style="font-size:24px; margin-bottom:10px;">Connect to your Google Sheet</h1>
+        <p style="font-size:13px; color:var(--ink-soft); line-height:1.5; margin-bottom:18px;">
+          Paste the Web App URL and password from your Apps Script deployment. Both phones should use the exact same values.
+        </p>
+        <div class="field">
+          <label>Web App URL</label>
+          <input class="note-in" id="setupUrl" type="text" placeholder="https://script.google.com/macros/s/.../exec" value="${existing ? escapeHtml(existing.url) : ''}">
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input class="note-in" id="setupToken" type="text" placeholder="the SECRET you set in the script" value="${existing ? escapeHtml(existing.token) : ''}">
+        </div>
+        ${setupError ? `<div class="err">${escapeHtml(setupError)}</div>` : ''}
+        <div class="sheet-actions" style="margin-top:4px;">
+          ${existing ? `<button class="ghost-dark" onclick="cancelReconnect()">Cancel</button>` : ''}
+          <button class="primary" style="flex:1;" onclick="testAndSaveConfig()" ${setupTesting ? 'disabled' : ''}>${setupTesting ? 'Testing connection…' : 'Connect'}</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function cancelReconnect(){
+  setupMode = false;
+  setupError = '';
+  render();
+}
+
+async function testAndSaveConfig(){
+  const url = document.getElementById('setupUrl').value.trim();
+  const token = document.getElementById('setupToken').value.trim();
+  if(!url || !token){
+    setupError = 'Enter both the Web App URL and the password.';
+    render();
+    return;
+  }
+  setupTesting = true;
+  setupError = '';
+  render();
+  try{
+    const testUrlObj = new URL(url);
+    testUrlObj.searchParams.set('key', STORAGE_KEY);
+    testUrlObj.searchParams.set('token', token);
+    const res = await fetch(testUrlObj.toString());
+    const data = await res.json();
+    if(data.error){
+      setupError = data.error === 'unauthorized'
+        ? 'That password was rejected by the script — double check it matches SECRET exactly.'
+        : 'The script returned an error: ' + data.error;
+      setupTesting = false;
+      render();
+      return;
+    }
+    saveConfig({ url, token });
+    setupMode = false;
+    setupTesting = false;
+    await loadData();
+    startPolling();
+  } catch(e){
+    setupError = 'Could not reach that URL. Check it was copied in full and ends in /exec.';
+    setupTesting = false;
+    render();
+  }
+}
+
+/* ---------- Remote storage via Google Apps Script ---------- */
+async function remoteGet(key){
+  const u = new URL(config.url);
+  u.searchParams.set('key', key);
+  u.searchParams.set('token', config.token);
+  const res = await fetch(u.toString());
+  const data = await res.json();
+  if(data.error) throw new Error(data.error);
+  return data.value;
+}
+async function remoteSet(key, value){
+  // Sent as text/plain to avoid a CORS preflight that Apps Script can't handle.
+  const res = await fetch(config.url, {
+    method: 'POST',
+    body: JSON.stringify({ key, value, token: config.token })
+  });
+  const data = await res.json();
+  if(data.error) throw new Error(data.error);
+  return data;
+}
+
+async function loadData(silent){
+  if(!silent) syncState = 'idle';
+  try{
+    const value = await remoteGet(STORAGE_KEY);
+    if(value){
+      state = JSON.parse(value);
+    } else if(!silent){
+      state = {
+        categories: DEFAULT_CATEGORIES.map(c => ({ id: uid(), ...c, balance: c.amount })),
+        transactions: [],
+        lastMonthProcessed: currentYM()
+      };
+      await persist();
+    }
+    syncState = 'saved';
+  } catch(e){
+    console.error('load failed', e);
+    syncState = 'error';
+    if(!loaded){
+      // first ever load and it failed — still show the empty defaults locally
+      state = {
+        categories: DEFAULT_CATEGORIES.map(c => ({ id: uid(), ...c, balance: c.amount })),
+        transactions: [],
+        lastMonthProcessed: currentYM()
+      };
+    }
+  }
+  processMonthRollover();
+  loaded = true;
+  render();
+}
+
+async function persist(){
+  syncState = 'saving';
+  renderSyncBadge();
+  try{
+    await remoteSet(STORAGE_KEY, JSON.stringify(state));
+    syncState = 'saved';
+  } catch(e){
+    console.error('save failed', e);
+    syncState = 'error';
+  }
+  renderSyncBadge();
+}
+
+function renderSyncBadge(){
+  const el = document.getElementById('syncBadge');
+  if(!el) return;
+  const map = {
+    idle: ['', ''],
+    saving: ['Saving…', 'saving'],
+    saved: ['Synced', 'saved'],
+    error: ['Not synced — check connection', 'error']
+  };
+  const [label, cls] = map[syncState] || ['',''];
+  el.textContent = label;
+  el.className = 'sync-badge ' + cls;
+}
+
+function startPolling(){
+  if(pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(() => {
+    if(document.hidden) return;
+    if(sheet) return; // don't yank the screen while someone is mid-entry
+    loadData(true);
+  }, 20000);
+}
+
+function processMonthRollover(){
+  const ym = currentYM();
+  if(state.lastMonthProcessed === ym) return;
+  state.categories.forEach(c => {
+    if(c.type === 'reset'){
+      c.balance = c.amount;
+    } else {
+      c.balance = (c.balance || 0) + c.amount;
+    }
+  });
+  state.lastMonthProcessed = ym;
+  persist();
+}
+
+function totalAvailable(){
+  return state.categories.reduce((s,c)=> s + c.balance, 0);
+}
+
+/* ---------- Rendering ---------- */
+function render(){
+  const app = document.getElementById('app');
+  if(setupMode){ app.innerHTML = renderSetupScreen(); return; }
+  if(!loaded){ app.innerHTML = '<div class="empty-state"><h2>Loading…</h2></div>'; return; }
+
+  let html = '';
+  html += `<header class="top">
+    <div class="eyebrow-row">
+      <div class="eyebrow">Household Ledger</div>
+      <span id="syncBadge" class="sync-badge"></span>
+    </div>
+    <h1 class="month">${monthLabel()}</h1>
+    <div class="total-row">
+      <span class="total-label">Available across all funds</span>
+      <span class="total-amt">${fmt(totalAvailable())}</span>
+    </div>
+  </header>`;
+
+  html += `<nav class="tabs">
+    <button class="${activeTab==='home'?'active':''}" onclick="setTab('home')">Funds</button>
+    <button class="${activeTab==='history'?'active':''}" onclick="setTab('history')">History</button>
+    <button class="${activeTab==='settings'?'active':''}" onclick="setTab('settings')">Settings</button>
+  </nav>`;
+
+  html += `<main>`;
+  if(activeTab === 'home') html += renderHome();
+  if(activeTab === 'history') html += renderHistory();
+  if(activeTab === 'settings') html += renderSettings();
+  html += `</main>`;
+
+  if(activeTab !== 'settings'){
+    html += `<div class="fab"><button onclick="openLogSheet()">＋ Log a purchase</button></div>`;
+  }
+
+  app.innerHTML = html;
+  renderSyncBadge();
+
+  if(sheet) renderSheet();
+}
+
+function renderHome(){
+  if(state.categories.length === 0){
+    return `<div class="empty-state">
+      <h2>No funds yet</h2>
+      <p>Add your first fund in Settings to get started.</p>
+    </div>`;
+  }
+  return state.categories.map(c => {
+    const pct = c.amount > 0 ? Math.max(0, Math.min(100, (c.balance / c.amount) * 100)) : 0;
+    const low = c.balance < 0;
+    return `<div class="envelope" onclick="openLogSheet('${c.id}')">
+      <div class="env-top">
+        <div>
+          <div class="env-name">${escapeHtml(c.name)}</div>
+          <span class="env-type ${c.type}">${c.type === 'rollover' ? 'Rolls over' : 'Resets monthly'}</span>
+        </div>
+        <div class="env-balance ${low?'low':''}">${fmt(c.balance)}</div>
+      </div>
+      <div class="env-bottom">
+        <div class="env-budget">of ${fmt(c.amount)}/mo</div>
+        <div class="env-bar"><div class="env-bar-fill" style="width:${pct}%; background:${low?'var(--rust)':'var(--green-ok)'}"></div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderHistory(){
+  if(state.transactions.length === 0){
+    return `<div class="empty-state"><h2>No purchases logged yet</h2><p>Tap "Log a purchase" to record your first one.</p></div>`;
+  }
+  const sorted = [...state.transactions].sort((a,b)=> b.date.localeCompare(a.date));
+  return sorted.map(t => {
+    const cat = state.categories.find(c => c.id === t.categoryId);
+    const d = new Date(t.date);
+    const isAdj = t.kind === 'adjustment';
+    const label = isAdj ? 'Balance adjusted' : (cat ? escapeHtml(cat.name) : 'Deleted fund');
+    const noteLine = isAdj
+      ? `<div class="tx-note">${cat ? escapeHtml(cat.name) : 'Deleted fund'}</div>`
+      : (t.note ? `<div class="tx-note">${escapeHtml(t.note)}</div>` : '');
+    const amtDisplay = isAdj
+      ? `${t.amount >= 0 ? '+' : '-'}${fmt(Math.abs(t.amount))}`
+      : `-${fmt(t.amount)}`;
+    const amtClass = isAdj && t.amount >= 0 ? 'tx-amt pos' : 'tx-amt';
+    return `<div class="tx-row ${isAdj?'adjustment':''}">
+      <div class="tx-info">
+        <div class="tx-cat">${label}</div>
+        ${noteLine}
+        <div class="tx-date">${d.toLocaleDateString('en-US',{month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})}</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:2px;">
+        <div class="${amtClass}">${amtDisplay}</div>
+        <button class="tx-del" onclick="deleteTx('${t.id}')" title="Delete">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderSettings(){
+  let html = `<div class="month-note" style="padding-left:0; padding-bottom:2px;">Funds reset or roll over automatically on the 1st of each month, based on the monthly amount you set below.</div>`;
+  html += state.categories.map(c => `
+    <div class="settings-card">
+      <div class="set-row">
+        <input type="text" value="${escapeHtml(c.name)}" onchange="updateCatName('${c.id}', this.value)">
+        <button class="del-cat" onclick="deleteCat('${c.id}')">Remove</button>
+      </div>
+      <div class="set-sub">
+        <label>Monthly amount
+          <input class="amt-input" type="number" step="0.01" value="${c.amount}" onchange="updateCatAmount('${c.id}', this.value)">
+        </label>
+        <div class="type-toggle">
+          <button class="${c.type==='reset'?'on':''}" onclick="updateCatType('${c.id}','reset')">Resets</button>
+          <button class="${c.type==='rollover'?'on':''}" onclick="updateCatType('${c.id}','rollover')">Rolls over</button>
+        </div>
+      </div>
+      <div class="bal-row">
+        <div class="bal-current">Current balance: <b>${fmt(c.balance)}</b></div>
+        <button class="adjust-link" onclick="openAdjustSheet('${c.id}')">Adjust balance</button>
+      </div>
+    </div>
+  `).join('');
+  html += `<button class="add-cat-btn" onclick="addCategory()">＋ Add a fund</button>`;
+
+  html += `<div class="settings-card" style="margin-top:22px;">
+    <div class="set-row"><div class="env-name" style="font-size:16px;">Sync</div></div>
+    <div style="font-size:12px; color:var(--ink-soft); margin-top:6px; line-height:1.5;">
+      Both phones read and write to the same Google Sheet. Updates from the other phone appear automatically about every 20 seconds, or tap refresh below.
+    </div>
+    <div style="display:flex; gap:8px; margin-top:12px;">
+      <button class="ghost-dark" style="flex:1;" onclick="manualRefresh()">Refresh now</button>
+      <button class="ghost-dark" style="flex:1;" onclick="openReconnect()">Change connection</button>
+    </div>
+  </div>`;
+  return html;
+}
+
+function manualRefresh(){ loadData(true); }
+
+/* ---------- Sheet (Log purchase) ---------- */
+function openLogSheet(preselectId){
+  sheet = { type:'log', categoryId: preselectId || (state.categories[0] ? state.categories[0].id : null), amount: '', note: '', error: '' };
+  render();
+}
+function openAdjustSheet(categoryId){
+  const c = state.categories.find(c=>c.id===categoryId);
+  if(!c) return;
+  sheet = { type:'adjust', categoryId, value: String(c.balance), error: '', confirming: false };
+  render();
+}
+function closeSheet(){ sheet = null; render(); }
+
+function renderSheet(){
+  const existing = document.querySelector('.overlay');
+  if(existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.onclick = (e) => { if(e.target === overlay) closeSheet(); };
+
+  if(sheet.type === 'adjust'){
+    overlay.innerHTML = renderAdjustSheetHtml();
+    document.getElementById('app').appendChild(overlay);
+    if(!sheet.confirming){
+      const valEl = document.getElementById('adjInput');
+      if(valEl){
+        valEl.focus();
+        valEl.select();
+        valEl.oninput = (e) => { sheet.value = e.target.value; };
+      }
+    }
+    return;
+  }
+
+  const catButtons = state.categories.map(c =>
+    `<button class="${sheet.categoryId===c.id?'sel':''}" onclick="pickCat('${c.id}')">${escapeHtml(c.name)}</button>`
+  ).join('');
+
+  overlay.innerHTML = `
+    <div class="sheet">
+      <h2>Log a purchase</h2>
+      <div class="field">
+        <label>From which fund</label>
+        <div class="cat-pick">${catButtons || '<span style="font-size:13px;color:var(--ink-soft)">Add a fund in Settings first</span>'}</div>
+      </div>
+      <div class="field">
+        <label>Amount spent</label>
+        <input class="amt-big" id="amtInput" type="number" inputmode="decimal" step="0.01" placeholder="0.00" value="${sheet.amount}">
+      </div>
+      <div class="field">
+        <label>Note (optional)</label>
+        <input class="note-in" id="noteInput" type="text" placeholder="e.g. Costco run" value="${escapeHtml(sheet.note)}">
+      </div>
+      ${sheet.error ? `<div class="err">${sheet.error}</div>` : ''}
+      <div class="sheet-actions">
+        <button class="ghost-dark" onclick="closeSheet()">Cancel</button>
+        <button class="primary" onclick="submitLog()">Save</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('app').appendChild(overlay);
+  const amtEl = document.getElementById('amtInput');
+  amtEl.focus();
+  amtEl.oninput = (e) => { sheet.amount = e.target.value; };
+  document.getElementById('noteInput').oninput = (e) => { sheet.note = e.target.value; };
+}
+
+function renderAdjustSheetHtml(){
+  const c = state.categories.find(c=>c.id===sheet.categoryId);
+  const catName = c ? escapeHtml(c.name) : 'this fund';
+
+  if(sheet.confirming){
+    const newVal = parseFloat(sheet.value);
+    const delta = newVal - c.balance;
+    const deltaStr = (delta >= 0 ? '+' : '-') + fmt(Math.abs(delta)).replace('$','$');
+    return `
+      <div class="sheet">
+        <h2>Confirm balance change</h2>
+        <div class="warn-box">
+          <b>This overrides the balance directly.</b>
+          "${catName}" will change from <b>${fmt(c.balance)}</b> to <b>${fmt(newVal)}</b> (${deltaStr}). This is logged in History as an adjustment, not a purchase. It can't be undone automatically — you'd need to re-adjust it back.
+        </div>
+        <div class="sheet-actions">
+          <button class="ghost-dark" onclick="cancelConfirm()">Go back</button>
+          <button class="primary" onclick="commitAdjust()">Yes, change balance</button>
+        </div>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="sheet">
+      <h2>Adjust balance</h2>
+      <div class="field">
+        <label>${catName} — new balance</label>
+        <input class="amt-big" id="adjInput" type="number" inputmode="decimal" step="0.01" value="${sheet.value}">
+      </div>
+      ${sheet.error ? `<div class="err">${sheet.error}</div>` : ''}
+      <div class="sheet-actions">
+        <button class="ghost-dark" onclick="closeSheet()">Cancel</button>
+        <button class="primary" onclick="reviewAdjust()">Continue</button>
+      </div>
+    </div>
+  `;
+}
+
+function reviewAdjust(){
+  const val = parseFloat(sheet.value);
+  if(isNaN(val)){ sheet.error = 'Enter a valid number.'; renderSheet(); return; }
+  sheet.error = '';
+  sheet.confirming = true;
+  renderSheet();
+}
+function cancelConfirm(){
+  sheet.confirming = false;
+  renderSheet();
+}
+function commitAdjust(){
+  const c = state.categories.find(c=>c.id===sheet.categoryId);
+  if(!c){ closeSheet(); return; }
+  const newVal = parseFloat(sheet.value);
+  const delta = newVal - c.balance;
+  c.balance = newVal;
+  state.transactions.push({
+    id: uid(),
+    categoryId: c.id,
+    kind: 'adjustment',
+    amount: delta,
+    note: '',
+    date: new Date().toISOString()
+  });
+  persist();
+  sheet = null;
+  render();
+}
+
+function pickCat(id){ sheet.categoryId = id; renderSheet(); }
+
+function submitLog(){
+  const amt = parseFloat(sheet.amount);
+  if(!sheet.categoryId){ sheet.error = 'Add a fund first.'; renderSheet(); return; }
+  if(isNaN(amt) || amt <= 0){ sheet.error = 'Enter an amount greater than 0.'; renderSheet(); return; }
+  const cat = state.categories.find(c => c.id === sheet.categoryId);
+  cat.balance -= amt;
+  state.transactions.push({
+    id: uid(),
+    categoryId: sheet.categoryId,
+    kind: 'purchase',
+    amount: amt,
+    note: sheet.note.trim(),
+    date: new Date().toISOString()
+  });
+  persist();
+  sheet = null;
+  render();
+}
+
+function deleteTx(id){
+  const tx = state.transactions.find(t => t.id === id);
+  if(!tx) return;
+  const cat = state.categories.find(c => c.id === tx.categoryId);
+  if(cat){
+    if(tx.kind === 'adjustment'){
+      cat.balance -= tx.amount; // amount is a signed delta, so undo by subtracting it
+    } else {
+      cat.balance += tx.amount; // purchases store a positive spend amount
+    }
+  }
+  state.transactions = state.transactions.filter(t => t.id !== id);
+  persist();
+  render();
+}
+
+/* ---------- Settings actions ---------- */
+function updateCatName(id, val){
+  const c = state.categories.find(c=>c.id===id);
+  if(c) c.name = val;
+  persist();
+}
+function updateCatAmount(id, val){
+  const c = state.categories.find(c=>c.id===id);
+  if(c) c.amount = parseFloat(val) || 0;
+  persist();
+}
+function updateCatType(id, type){
+  const c = state.categories.find(c=>c.id===id);
+  if(c) c.type = type;
+  persist();
+  render();
+}
+function deleteCat(id){
+  state.categories = state.categories.filter(c=>c.id!==id);
+  persist();
+  render();
+}
+function addCategory(){
+  state.categories.push({ id: uid(), name: 'New Fund', type: 'rollover', amount: 0, balance: 0 });
+  persist();
+  render();
+}
+
+function setTab(t){ activeTab = t; sheet = null; render(); }
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function init(){
+  config = getConfig();
+  if(!config){
+    setupMode = true;
+    render();
+  } else {
+    loadData().then(startPolling);
+  }
+}
+init();
+</script>
+</body>
+</html>
