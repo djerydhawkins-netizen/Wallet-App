@@ -8,16 +8,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg: #1f3b32;
-    --bg-alt: #16281f;
-    --paper: #f2ead9;
-    --paper-2: #e8ddc4;
-    --ink: #202a22;
-    --ink-soft: #5b6b5f;
-    --gold: #c9973f;
+    --bg: #0d2440;
+    --bg-alt: #081729;
+    --paper: #f7f4ee;
+    --paper-2: #ece7db;
+    --ink: #1c2733;
+    --ink-soft: #5c6b7a;
+    --gold: #2fa66b;
+    --amber: #cc7a2e;
     --rust: #b25139;
-    --green-ok: #3f7a5c;
-    --line: rgba(32,42,34,0.14);
+    --green-ok: #3f8f5f;
+    --line: rgba(28,39,51,0.14);
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
   html,body{margin:0; padding:0;}
@@ -44,7 +45,7 @@
 
   /* ---- Header ---- */
   header.top{
-    padding: 28px 20px 18px;
+    padding: 20px 20px 14px;
     display:flex;
     flex-direction:column;
     gap:4px;
@@ -54,22 +55,110 @@
     align-items:center;
     justify-content:space-between;
   }
+  .header-left{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .logo-badge{
+    width:44px;
+    height:44px;
+    border-radius:50%;
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  .app-logo{
+    height:36px;
+    width:auto;
+    display:block;
+  }
   .eyebrow{
     font-family:'IBM Plex Mono', monospace;
     font-size:11px;
     letter-spacing:0.14em;
     text-transform:uppercase;
-    color: rgba(242,234,217,0.55);
+    color: rgba(247,244,238,0.55);
   }
   .sync-badge{
     font-family:'IBM Plex Mono', monospace;
     font-size:10px;
     letter-spacing:0.04em;
-    color: rgba(242,234,217,0.45);
+    color: rgba(247,244,238,0.45);
   }
   .sync-badge.saving{ color: var(--gold); }
-  .sync-badge.saved{ color: rgba(242,234,217,0.45); }
+  .sync-badge.saved{ color: rgba(247,244,238,0.45); }
   .sync-badge.error{ color: #e08a6f; }
+  .sync-badge.preview{ color: var(--gold); }
+  .preview-link{
+    background:none; border:none;
+    font-family:'Inter', sans-serif;
+    font-size:12px;
+    color: var(--ink-soft);
+    text-decoration: underline;
+    cursor:pointer;
+  }
+  .header-right{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .gear-btn{
+    background: rgba(247,244,238,0.12);
+    border: 1px solid rgba(247,244,238,0.22);
+    color: var(--paper);
+    width:32px; height:32px;
+    border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    padding:0;
+  }
+  .gear-btn:active{ background: rgba(247,244,238,0.22); }
+  .settings-overlay{
+    position:fixed; inset:0;
+    background: rgba(15,22,17,0.5);
+    display:flex;
+    justify-content:center;
+    z-index:40;
+  }
+  .settings-panel{
+    background: var(--bg-alt);
+    width:100%;
+    max-width:480px;
+    height:100%;
+    overflow-y:auto;
+    animation: slideDown .16s ease-out;
+    padding-bottom:40px;
+  }
+  @keyframes slideDown{ from{ transform: translateY(-14px); opacity:0;} to{ transform:none; opacity:1;} }
+  .settings-panel-head{
+    position:sticky; top:0;
+    background: var(--bg-alt);
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 20px 18px 12px;
+    border-bottom: 1px solid rgba(247,244,238,0.1);
+  }
+  .settings-panel-head h2{
+    font-family:'Zilla Slab', serif;
+    color: var(--paper);
+    margin:0;
+    font-size:20px;
+  }
+  .close-btn{
+    background: rgba(247,244,238,0.1);
+    border:none;
+    color: var(--paper);
+    width:30px; height:30px;
+    border-radius:50%;
+    cursor:pointer;
+    font-size:14px;
+  }
+  .settings-panel-body{
+    padding: 16px 16px 0;
+  }
   h1.month{
     font-family:'Zilla Slab', serif;
     font-weight:600;
@@ -85,7 +174,7 @@
   }
   .total-label{
     font-size:13px;
-    color: rgba(242,234,217,0.6);
+    color: rgba(247,244,238,0.6);
   }
   .total-amt{
     font-family:'IBM Plex Mono', monospace;
@@ -105,9 +194,9 @@
     font-weight:600;
     padding:8px 14px;
     border-radius:999px;
-    border:1px solid rgba(242,234,217,0.25);
+    border:1px solid rgba(247,244,238,0.25);
     background: transparent;
-    color: rgba(242,234,217,0.7);
+    color: rgba(247,244,238,0.7);
     cursor:pointer;
   }
   nav.tabs button.active{
@@ -129,24 +218,16 @@
     position:relative;
     background: var(--paper);
     color: var(--ink);
-    border-radius: 14px;
+    border-radius: 0;
+    margin: 0 -16px;
     padding: 20px 18px 16px;
     cursor:pointer;
     overflow:hidden;
-    border: 1px solid rgba(0,0,0,0.06);
+    border-top: 1px solid rgba(0,0,0,0.06);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
     transition: transform .12s ease;
   }
   .envelope:active{ transform: scale(0.98); }
-  .envelope::before{
-    /* flap */
-    content:"";
-    position:absolute;
-    top:0; left:0; right:0;
-    height:46px;
-    background: linear-gradient(135deg, transparent 49.3%, rgba(0,0,0,0.05) 49.3% 50.7%, transparent 50.7%),
-                linear-gradient(45deg, transparent 49.3%, rgba(0,0,0,0.05) 49.3% 50.7%, transparent 50.7%);
-    pointer-events:none;
-  }
   .env-top{
     display:flex;
     justify-content:space-between;
@@ -169,8 +250,8 @@
     margin-top:3px;
     display:inline-block;
   }
-  .env-type.rollover{ background: rgba(201,151,63,0.18); color:#8a6222; }
-  .env-type.reset{ background: rgba(63,122,94,0.16); color:#2c5c43; }
+  .env-type.rollover{ background: rgba(47,166,107,0.16); color:#1f7a4d; }
+  .env-type.reset{ background: rgba(21,74,114,0.14); color:#154a72; }
 
   .env-balance{
     font-family:'IBM Plex Mono', monospace;
@@ -185,7 +266,7 @@
     display:flex;
     justify-content:space-between;
     align-items:center;
-    border-top: 1px dashed rgba(32,42,34,0.22);
+    border-top: 1px dashed rgba(28,39,51,0.22);
     padding-top:10px;
   }
   .env-budget{
@@ -195,7 +276,7 @@
   .env-bar{
     flex:1;
     height:5px;
-    background: rgba(32,42,34,0.1);
+    background: rgba(28,39,51,0.1);
     border-radius:3px;
     margin-left:12px;
     overflow:hidden;
@@ -209,7 +290,7 @@
   .empty-state{
     text-align:center;
     padding: 60px 24px;
-    color: rgba(242,234,217,0.6);
+    color: rgba(247,244,238,0.6);
   }
   .empty-state h2{
     font-family:'Zilla Slab', serif;
@@ -238,6 +319,10 @@
   .tx-del{
     background:none; border:none; color: var(--ink-soft); font-size:16px; cursor:pointer; padding:4px 6px;
   }
+  .tx-edit{
+    background:none; border:none; color: var(--ink-soft); cursor:pointer; padding:4px 6px;
+    display:flex; align-items:center;
+  }
 
   /* ---- Settings ---- */
   .settings-card{
@@ -247,6 +332,37 @@
     padding: 14px 16px;
   }
   .settings-card + .settings-card{ margin-top: 10px; }
+  .cat-summary-top{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .pencil-btn{
+    background: rgba(28,39,51,0.06);
+    border:1px solid rgba(28,39,51,0.12);
+    color: var(--ink-soft);
+    width:34px; height:34px;
+    border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .pencil-btn:active{ background: rgba(28,39,51,0.12); }
+  .cat-summary-bottom{
+    display:flex;
+    justify-content:space-between;
+    margin-top:12px;
+    padding-top:10px;
+    border-top: 1px dashed rgba(28,39,51,0.16);
+    font-size:12px;
+    color: var(--ink-soft);
+  }
+  .cat-summary-bottom b{
+    font-family:'IBM Plex Mono', monospace;
+    color: var(--ink);
+    font-size:13px;
+  }
   .set-row{ display:flex; align-items:center; gap:10px; }
   .set-row input[type=text]{
     font-family:'Zilla Slab', serif;
@@ -262,7 +378,7 @@
   .amt-input{
     font-family:'IBM Plex Mono', monospace;
     font-size:13px;
-    border:1px solid rgba(32,42,34,0.2);
+    border:1px solid rgba(28,39,51,0.2);
     border-radius:6px;
     padding:5px 7px;
     width:90px;
@@ -277,7 +393,7 @@
     font-family:'IBM Plex Mono', monospace;
     padding:4px 8px;
     border-radius:6px;
-    border:1px solid rgba(32,42,34,0.2);
+    border:1px solid rgba(28,39,51,0.2);
     background:transparent;
     color: var(--ink-soft);
     cursor:pointer;
@@ -294,7 +410,7 @@
   .bal-row{
     display:flex; align-items:center; justify-content:space-between;
     margin-top:10px; padding-top:10px;
-    border-top: 1px dashed rgba(32,42,34,0.16);
+    border-top: 1px dashed rgba(28,39,51,0.16);
   }
   .bal-current{
     font-size:12px; color: var(--ink-soft);
@@ -305,7 +421,7 @@
     font-size:13px;
   }
   .adjust-link{
-    background:none; border:none; color:#8a6222; font-size:12px; font-weight:700;
+    background:none; border:none; color:#1f7a4d; font-size:12px; font-weight:700;
     cursor:pointer; text-decoration:underline;
   }
   .warn-box{
@@ -319,11 +435,29 @@
     margin-bottom:14px;
   }
   .warn-box b{ display:block; margin-bottom:4px; color: var(--rust); }
-  .tx-row.adjustment .tx-amt.pos{ color: var(--green-ok); }
+  .preview-list{
+    margin-bottom:16px;
+    max-height:220px;
+    overflow-y:auto;
+    border-radius:10px;
+    border: 1px solid rgba(28,39,51,0.12);
+  }
+  .preview-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:13px;
+    padding:10px 12px;
+    border-bottom: 1px solid rgba(28,39,51,0.08);
+  }
+  .preview-row:last-child{ border-bottom:none; }
+  .preview-row span:first-child{ color: var(--ink-soft); }
+  .preview-row span:last-child{ font-family:'IBM Plex Mono', monospace; }
+  .tx-amt.pos{ color: var(--green-ok); }
 
   button.primary{
     background: var(--gold);
-    color: #2b1e08;
+    color: #fff;
     border:none;
     font-family:'Inter', sans-serif;
     font-weight:700;
@@ -335,7 +469,7 @@
   button.ghost{
     background: transparent;
     color: var(--paper);
-    border: 1px solid rgba(242,234,217,0.3);
+    border: 1px solid rgba(247,244,238,0.3);
     font-family:'Inter', sans-serif;
     font-weight:600;
     font-size:13px;
@@ -347,9 +481,9 @@
     width:100%;
     padding:14px;
     border-radius:12px;
-    border: 1px dashed rgba(242,234,217,0.35);
+    border: 1px dashed rgba(247,244,238,0.35);
     background:transparent;
-    color: rgba(242,234,217,0.75);
+    color: rgba(247,244,238,0.75);
     font-family:'Inter', sans-serif;
     font-weight:600;
     cursor:pointer;
@@ -360,28 +494,34 @@
     position:fixed;
     bottom:24px;
     left:50%;
-    transform: translateX(calc(-50% + 0px));
+    transform: translateX(-50%);
     max-width:480px;
-    width:calc(100% - 32px);
+    width:100%;
+    box-sizing:border-box;
+    padding: 0 20px;
     display:flex;
-    justify-content:center;
+    justify-content:flex-end;
     pointer-events:none;
+    z-index:25;
   }
   .fab button{
     pointer-events:all;
     background: var(--gold);
-    color:#2b1e08;
+    color:#fff;
     border:none;
     font-family:'Inter', sans-serif;
     font-weight:700;
-    font-size:15px;
-    padding: 15px 26px;
-    border-radius: 999px;
+    font-size:28px;
+    width:56px;
+    height:56px;
+    border-radius:50%;
     box-shadow: 0 8px 24px rgba(0,0,0,0.35);
     cursor:pointer;
     display:flex;
     align-items:center;
-    gap:8px;
+    justify-content:center;
+    line-height:1;
+    padding:0;
   }
 
   /* ---- Sheet / modal ---- */
@@ -417,7 +557,7 @@
   .cat-pick button{
     padding: 9px 13px;
     border-radius: 10px;
-    border: 1px solid rgba(32,42,34,0.18);
+    border: 1px solid rgba(28,39,51,0.18);
     background:#fff;
     font-size:13px;
     font-weight:600;
@@ -435,7 +575,7 @@
     font-size:32px;
     font-weight:600;
     border:none;
-    border-bottom: 2px solid rgba(32,42,34,0.18);
+    border-bottom: 2px solid rgba(28,39,51,0.18);
     background:transparent;
     padding: 6px 0;
     color:var(--ink);
@@ -445,7 +585,7 @@
     width:100%;
     font-family:'Inter', sans-serif;
     font-size:14px;
-    border:1px solid rgba(32,42,34,0.18);
+    border:1px solid rgba(28,39,51,0.18);
     border-radius:8px;
     padding:10px 12px;
     background:#fff;
@@ -454,13 +594,13 @@
   .sheet-actions{ display:flex; gap:10px; margin-top:8px; }
   .sheet-actions button.primary{ flex:1; }
   .sheet-actions button.ghost-dark{
-    background:transparent; border:1px solid rgba(32,42,34,0.2); color: var(--ink);
+    background:transparent; border:1px solid rgba(28,39,51,0.2); color: var(--ink);
     font-weight:600; padding:12px 16px; border-radius:10px; cursor:pointer;
   }
   .err{ color: var(--rust); font-size:12px; margin-top:-6px; margin-bottom:10px; }
   .month-note{
     font-size:12px;
-    color: rgba(242,234,217,0.55);
+    color: rgba(247,244,238,0.55);
     padding: 0 20px 8px;
   }
   .setup-wrap{
@@ -484,6 +624,7 @@
 <div id="app"><div class="empty-state"><h2>Loading…</h2></div></div>
 
 <script>
+const LOGO_URI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJUAAACgCAYAAAAFFS5RAABReUlEQVR4nO1dd5wURfb/vqqemU0sy7LkKFFBCYKKAQdzREQcTsUzZ0/vzPmG9c5Tz+wpngFzZD0jihkGzIrpFBUVyWGBhc0z01X1fn9090zP7AK7sALnb7+fz8JMT4cKr1+uV0ArWtGKVrSiFa1oRSta0YpWtKIVrWgpMCgcDVvbuhmt+H2AItMicls3ohW/E/iJ6V9vP9b+5CmnXvjIzEdytmWbWvE/img0KgAQADBz8IQpJ5y/95V7L95z8p584u3HTwKA37MopG3dgN8TotGoKJ1XSiiDDogATrnv9OMWrPr5mhpdvXOyKgnNWhe3LZ4/c/LMoTSZNErBAHhbt7ul0UpULQBmpjGTx8hYaUwBwOkPnr334tULo1U1lQfF6+tBTFoIIRjGWCFLds3tPOnlv05/OhwNW941vyf8blnwVgKFo2FJRAqAuvyxa3eau+iTy777+etTk7BhktoIFmCGZDDAoGRtksvV2quZ+VmaTAbOi/274lZiWzfgfxWuEs6x0ph6ZOa0zkfdfvRNc3567/N1tWtPra+tZ5MwmgQJJgiAAQOwgYAgo3LU4BPvPvE0lMKEo+HfnWXYKv6aici0iCybWGYAMDPnHn3rhPPWVpZfbFuqa6ImASjWYJKQDIAADUC4A20ASBgjDRUG2iyYfcOcgQQyoFZO9f8S0WhUIApRNrFMWzLAx9974kmjrx392YqKpbfW1NR0TVTFFRkwAAnhEpRhbWCYyThURQwYFrBh6ijed9yt4yIg8O/Nj9XKqTYBZqaJEyeKsrIyLSBwyr2nHLFw7cLL63T9vonaOFixIpAEgdgwwAALGMOGCULm5uZA24qTySSkJQgggGBYMhWGChc9c+4zg7s90C2OyeDfC8dqVdQ3BAaFJ6eUcH3Ww2ftsmDlr9d/t+S7o23bhtFGkySCJIuNcwEDzGCDIMkgclAYbPvxHv13v+6XZT8dt6Dql9ONbTQBkg0EJ1nHrbreVzx/xckoxX1hhK0Yfh+WYCunagSu3qQB4G/P/63Xhz99ePXayrUns+SQXWN7OpAEAezwFgZBMxsrmB9CQX6b7wd0GHjLo+dOfSSpkrjpPzd1n/7da9/X1VTnQREZw0RMRpOi4jbtF828fuYgAsUBYHO4FTPTxLKJwmvztkarTuVDJOLoNmUTy/S0z6e1HXfL+L+/+c2bX6ytWXuWXZ8M2bW2JkkCwlHDWYNZszbGkMyxrKI2xcsGdtjpLzOvenf4A2fe90hSJSkSjQSvnHDl0uLcDg+JgCWYWRMAJhbEwtTLeO9THzj1JBA4PLnplmA0GhXhaNhCBJKIeHshKKCVqACkwyplZWWama0Jd0fOvGf6lK+WVyy5pra2ttiusxUEMcj1NzkMXhsyRLlCtiloW9W3c/9//uXIC4c+9ZfH7yKihOdyGIRBCgCFdzzoVisRqDHaSEdjB4QQlKir50XLF17BzDmxyTEN3rD0SBESIEpLS02sNKaojPQ9M+/pfOFjFx3OzNuFOvP/Wvz5wyqSJCbeOXFseeWq66sS1cO0rcFJowCSECBmgJkBhmE2kDmWCFo5qnP7zk/ts/OY0ssOufBXINPl4D0nHA5bsVhMjbtp/J1L1i36s0lqRRAWBIMNaysQkIO7DD7rsYseezDbyx6NRsUszBKx0piB45SAhMR9sUd2mPnNjDHr6yrHrl+/fn9hibZHjDy8/9Xjrv45Go2K0tJSs7XH08P/S6JiZqKJJFAGLSBw8v1n7LG4fMHfauJVB9m2DbZZg4jAjnPA9Xkbw4aFJaQlLHQp6fb6rjsMjV4fKf2cASASkZhW1qjPyZ1kfmDmA90effuxH2oTNXmShEOlmpQiJYsL2y0+/bArh/1x1OE1kWkRKv+unGKlMQ2XOAUErnvxht4/Lvr60DW1FePr6+pG27BzDWnYtTakJU2/Tv3OnnbptIe2dfjn/xdRuRadN+DXvnTtwK/mf3P92vXlE5NswySMIceEEwwGEcAgZmZDkmQwN4Si/KJP+nbu97cHTr3vNQ0NRCCjg6K8Kc7gKf8T7phw96LKRRfY6+0kBIJWKICcUAjtiooqdukw5JgbJ90Y866xYKH0ldIdv1v8wxFLyxcflEgmRhuh85RSYMWAJk0CIEmMEFld2nZ+acYVM8abY41EGbaZjvX/hqj8Ft090+/pPOPbGRdX1VX9qS5Zm2vqDZMgwwTp8AXXPWBYQ8AK5ATRNq/tjwO6Drpl6tn/nppUSQAQ0WgUTRUz0WhUlE4u5YdnP9x96jsPL6xPxkVbq+3youLCt7qU9Ci796S73iGiZCgQwsXPXrnzj0u+O2Td+oqj6+vrRxlLWyphw2gDMDQJAkgIaCYQAEmsoakwr23ltRNv6nPozntVIAqBUmwTEfi7Jyo/MfEqLjj2mYlnrl5XflV9oraDSioQCc3M0nNcuqaLZkBauRbyZf6Knp173/nEeY/+i4jq4WRybpb5Ho1GxfWl15uT7zj1NAOsee6yp15JqAQAwkVP/mWXX5cuOqaqvmpsguO7KlZkJ5IwSQ2AFAACkQCBPD+GYzMQnOii0YFAUA7rPvToh/700MvbUgT+bonKr4QzMx1316Tj11aVR2vsmgGJeAJQ0GA4yXTC8TexYa21llauhYLcwuoeHXtMHb/XCf+YuOvhq4FMAm0yGBQpiwhXR0pNsgULFzxx8ailKxdG1tatPSBpkkMTKgE7mQQUQAwFgJggHF87A4LAAiADBoMhnKiiI7JZURBWt7bdH5h+zfSzW4mqBeGzlpSAwFkPn3vI/MU/XFcTr947mUy4eggJFiBodiw6kGEwZI4UFlumc7uuT+038uDJFx903gLAydL0K82bhEtIZfeWEWJITSwzy8uevmr3Xyt+nVBVtX5sTW31gIQdBxsD1gwQKRIk2DDBgEAAC4ANgwwMJIxhI9iwEJaElMLJftAAMYwmJUoKO/z6bum7OxJR8jcZ4Cbg90NUWUr4lU9dOWLuwi+uqLPrIvF4PXS91sREhliA4CrhMKyZmVgGg0F0bNf5zV16DfnrLZNu/JTBQDhsYdYsDaJNElPKq11WBr+SzMw5Vz5/7ajvFnx98LrK9WM11M46YGDXJ8EJZhKkiSGYISABEMCaHU8WCWPIGFZGiIAQVl4A0kiEdM6qNm0Klq+qWTlcx7VnUMAYzXn5+Ri9836733LCPz6PclSU0tZ3LWwXzrItRTgatmIUUzHE1H0z7+v9+twZl836ZtaZSZMM6KQ2QgqQJMmOZgUwWGvWFCQrJz8HRTnFn/Uu6f23qec88OoMTPdbdAq04ffOT0hEpOEkuoCZc85+7Lw9V65aMf7Avx10eFzH+yYS9VBJBdbMBNIQJCggBJgt43m1GAwDZs2GiSQsLYSQIhjMRSiY83NJcYf3OrXp+NpNp98wZ/GqxcHTbz3zV2VULknhptcIraSyflgx7yAAn8+aPEsAW19Z/5/mVH4d55eKirZXP3b+RUsrll6QRKI4WZ0AsdAAJBODBAAGG83GGCOtkIU2eYU/9e6yww2Pn/vI4+Rwo01adBvhSG0ufebSfRetXHLM2pq1+9XFq3fQrKG0BifZEJMhQQLEwjEKCJAOiZMBG7BhsMVgBHMCCFpBhGT+L0U5hTN6dOr14r9OveMDIkp4zxMkMPq6MR9UJdfthQRrBkkI1ghCtg+1/yBWOmsfxbqVqJoK15kIAIaZ5TlTzzn7x6XzL6lNVPexEwowpAiQ7EtHgYCGhAzkBhBC7qruxd3uvfOip2/vQlQLbFwJb4yQCISfK35ue8MzN+xTUb9ufGVd5SH1ybruSZOEsQ2QZCYhNAQEGIKZQYLAzGDNDIJhBjMbS4QkQnlBIEHcJtTmm/ZFJTN6d+n58s1/uPkrIjfQDABhWJHzI9xuXTvxwNkPqLG3j7tsVc2Km5PrEwogC0RslKaCUH79hINP6n/Jgecu2xbe9f8povJbdBYsnHr/GUctWPXTdbWqdmS8ph7QUCSFZMPEzI5TnKC1bYQMCsoN5dV17tR5yjFjJt1y0rAJ5cCGicm3mCEVHgGAeUvntX9g5tQDFq9eOH5NxeoxCRPvbIihEjaMYkOCDDEJMAvHPeEQEjn2mzHGgAFpBSUIApYJ6HZFxV+UtO/wcs+2XV+9/eTbv0nYiXRDXEIqi6S99R6h/Gnqn4Z++vNnXyaScQgiYgUYbXQoPyD7du7/x2f/8uyT28IK/J8gKv9qFQGBy8uu2eO7RV9fv2rNioNtZYM1NAyICILJiakwwxjDEBaJYDCE9m1Knhvee8jkGyfd+APg6mGTY9ofVvGlkDBScTaB93/5oNP9bz6079qaNcfU1FUdkOREh3gyDh3XgCFDggwAwcwCxGB2B1YQg2HYMCAhSQrIgESOlZvMDxZ8FBDWSyMHjXrrpmOvn+f4qxyEo2Gr4+COGYTUCIiZ5T7Xjv5vnardEUk2zBAAKwRgdSns+uwb171x/LGRY2VZ2dbNYNjuicr/pt31+l1953w3Z/LyqhUnxO16oWuVEVICgKOnOEsMmA1rERJWMBhEQaDNO0P6DL3xrpNuf4/BQASSp7FxdahGA7YCAm98P7vrG3NfOHjJqiXHrK1eO7pW1RYpo6DiClCsSQqQIAH2iViwx5gME4OkkEISAsEQghyoCQVyZhe1bf/SmJ33jl108EXzFauMfo7BGNNUUeWNyzF3TLh7ScWSP9lVSQ2CBYYxkkVhfuGyOdfP7ueKz626Yme7JSq/WPpm/aJ2/3j0iguXrll2Sb1d20bbBjDQYJaQ5JCCATOxNsRWMBREfm7BV3279rvh8bMfeV5zZoxuQ5H/hz55pvOcuW8ftKZ29TFVtVVjkiZRFLfj0HEFAmmHZiDYzVrwZorAzAaawcSCpbAkgqEgLBOoCMjge7269Jp+YP/9Zp560KmLTVqSUjgals0hpMbG59yHzj34q0VfvVlXVWsECeGwWGPy2uSLPfuNGnPHyXfENstpuwXY7ogqSwm3Tn/grLN+Xjb/0oSJ7xCvjkNIocGQnJIxjiccgAwV5kAYubhLu+63vnDJc/e7DkARmRahQd8N4oaEZOH5L8t6vzn3zf1Xri+PrKlcvUdSJ9opraBtDWhoIQQgSLAx5Mk1dhxDjmAzTLBIWCELUkjkhfIqcoJ573Uq6vTCqD67vXveIeeV+7onwtGw2FxC8oOZiYj47c/fbvvX5/76Y72q7SSENAYs2LCSQWn1KOpx48tXvXz11tarthui8utNFlk4/4k/H/bT8h+ur6haO7K+pg7QpIQlJBMTXN82W6zZQMiAoJxAblWH9h3vOiN82t1HjTxqDQCcdf9ZgR+X/8h+b7iExGMfPNZr5rexQ1etXzm+qrZqdFLV5yWVDdYMNtBOEQQIJtdFCu9qGAM2zEwQkFbQQsAKwEJgRV4o/63O7Tq8eu6xl87Zp8vwcvaui0CGB4WpJQipAcKwEIM6cPKBz6yrrzjO2EYBZLFhY6BFYU7R5x/f8tFuSqv/d+IvI0B7/UvXD//8+8//UV5dfmhSJ51EOSLBhlO5TaRhjAFkoRAWW1yUW/TkiKF7Xn/TuNKfAeDQuw4NvfHnN2y4HCkogpgyZ0qvOfM+PqR89fJjquuq9lGk8u2ka/4DmpjAgHBDaankcx8/EiIohAgISFgIUWhl2zZFb5eUdH7hgmOumDmyuG9lqkcRyEgkgmmRaSnd7beAJ9Ym3TvpxJ9X//xEsjqhYUiyYWijOa8gT4/bZ9zgq4+4ev7WdC1sD0QFAHj1w1e7Tf106qWr1q46u66mNtckjRIBySRIMDOYGDAEaIYICmlJC20L27/VrVP3654482EnrBKFhVIn1mbBwtMfPt1v+hczDqqOV05cW71mRALJNol4HLpeQUorKYjgWGxuhRbjZncKZ0UDa1e0BS0ERADBQM7C3Ny8N/p02WHGeUdfPmdIUa91qQ5sJULywxOB971zX7cn3nvyp9p4dZCMgHHEtA4UBKy+7fucOu2iaY9vTRG4zYiKmWny5Mk05OAhJa9+9+aFC5b/dKkdSoZ0XIET7pwIBojAbsUBGZRgzQjJnK96dOjxt+fOf/qFVKLctChPxmSeMuOBkd+Uf3Xg8lUrxtUkavZQARuaNUzSQCWcqIsQIpU1Ai9N2A8iEDmri0MitLiosOiNzu26vlh6xr1zPGcpgG1CSA0QhZDXC3Pg9Qe/v15V7q1rFSgoICwJDY1iUfz625PfOIIjvNUS97YpURERT/twWrd358/Zu3zl0trcYEEimBOSWiuH3Sj/GEiEQhYQkOaRM/49012PlxFWYWa6dfqd4flrfuy8ZtUqJSBqiwuLbREIUsLWQus4FABLwonSSTf0qd0X2P0uAcCykBcM1V938p1ztztC8oOdDKvo8zfsuKxqSa/69XUsAoIgLSitELRlzeMXP/wBbz2VqgWJipkiEyc2e3XOZjrmxKBIxBqMzDevrKwMQMu/jYMig4KDMRjl5eWmY8eO256QGsEmxvF/p7KMs7Tp91sR7ncGAsKWuxztt37Q5oDdjCTXugoGcN55l3VZX5vovmrliqBSCpZlAVDwUtQa0xCt1D+AUuk8HJX614KV+tTIub7v3lfluwPcO6S/+VqhADv1xUYAAcBKt8B2Tw34HwTfKUh3L/ut8p7SsD/+VlqN9qHhSGWe5xvSjGc4P6UbRBTgdsWF6Nmla3LH7j0XnXPJWavttDoh4czdb8K9mk1UkUhElpWVaSkIZ55/+fAvv/vxj2sqKvZLKtWPSRQYbTuKLzkmFXvhC3je58zHe54gSp3GrnORvTOcZQj+vCZ2r6Cs7+5T0oo3uZdR1vENDIV3S05rIOR/TupUz+ua7ptzmDKu9cNzUzj387XX11fnFOd6Qdkj5ZybHk83fWYDM0hEEEJCABDg9Xn5bb7v0qH49QNH7P701aUXL2CkA9MbGZTNQvOIKhy2EIupv//9tm7Pz3jn7xVV1SfVJ5NCaxsuaTC5NAC4a1J8k+08kDIlfCrWkSKfzOalPOfpCUt/zbxnam68D+7E+GOyGXSw0d5nqiGZk5px+9REU4pQsm6V4T9NkbjXcl+v/YSSbnv6zFRYKN0P37O8NroBUK+RrlQhWNJCfk6opkPbtnd8Env1b0Rke0xiYyPRXDSdqCIRibIyfczEUw75Yt78R6qTdhewYkmkGSTYaAKISLidz6AOr/cuB8uw55EaRPZPjO8azroNuVFb/6h6L7yX8tII1fpuktky/wTC98k/jf7B4g2pvf4JdokjzaGy+XU2ZbvZDb6XLPNc/1T5qDRjBn1E6r2ARCAQO3eHMYAlSaIwmPvxoaN2O/neh25vccdok4jKo+YJfzj1yE+//fGl6vpaaQlSJISVFlxsjDGO0zv1Rhu375mTQr5jGT/4pFwGIWXM4EZOJs44NU1gvmMZHMK9xJPTlNnOzEmjRuY1q12NzHuam2URczbNZxHZRrKYs/oDN7rte0nd2zCcEIEQkgwgYdx8aiJlmALtCwpWjT/4wP3++c+/ft+ShNWEpkcFUGqOP/7kHT/85qe5VYn6XEuQMcZIAkBCGMMsSAYgSQBagYQACenTL/wchZDWddCA4yD7WyM6SopQ/C+8T3JwJsn6uGZjHIsaJb6UuHNv4HE/3iCbym5kNn/z2uJrMFKDkCG+yesjNbzeL9r9hEoEsPHGEiAhQSSgtA2lFMCaBQkmItf6M8pAWkV5+T9cfvykUWdfeXYNwMZV+LYITXkfBDOLvkP2eX99Xf0eUjoLLWEYzFobA5mfV2CXFJe8URjKfbegILRWBgKQUgKQ0LqhuHZ+c+H/3XVKagCpU3TGf6nTUidonfmbbORk756pi+FkIWQY1xIw3jGZcZ/U7YxO38d3ntbOb5mjlu6jTD1Yu931zpWp+zZoS7rpGffQWvv679zPNxTQxvk9GAgioRWtXFneybbj48vXrtkrCYYUZNgY4b4sCsKyenXq8vCX708/3Rx7rEQL6FcbJypXMR+137gTfl256illxxUBFkiAiLQ2LDu3KZyz3157/eXf9930hTbbrNBIKzaCnGAQEyJnHPDFzz/9e+Wa1f0sQQYg4SoDOiAsOXSHvru+8cazX7aEGNwUpxLMTP2G7fvZutraYQJsmI0kIg0ZlJ2Liqf/9+MZR7vLkyTCYQpvSWta0eKIxQDAySG764YbOtw9bUZsfTyxk4Qx7OZeaa2tru3aPTZvbuwU9rv7Whqe53XixFOHdhkwgov7DjMdBuzKJf2Hm8Jeg83AXfctX//t4mIACIejrV717RwjRpwVAIArrrhxaK+hY+raDxihS/oPNyX9h5l2fYZyryF7r3z/pffbuKc3z9WUhQ267GfNmiUAYNHK8j20sEAE7SqGOhTKoQE79PhX0c49K5yCXqW/iwKo/8uIRCIS4bAVDjceipk79wF7xIgRgZtvvurrzsVtpxFIgFkDRFIKoxmdbn/6iSHuvbYolLPBix22CVAwdzBJy/MWs9ZatskvsA/cd9+nAdCYMWNaFantAGVlZRqxmIrFYqq0tNQg0rA2e58+fQwA0bdLl+cDBBhmN+4Bo7Ti6rqqnQGgvLz8t+FUHirWVRSwUSAQiIgZRCFLrrrwwrOWAeDS0tItNkFbsWUQgjB0t/0mdu+76/mDRhxwwdkXXtvfteKk64UDAAwaNIgBmJ137jc/JyeX2fndWbWhNS1bsTIIALEtbc+mTqivq9HsWnVEAsyMnFAo9fvG42mt2AogS1qot9W/asD3VMTr7n7j3fc+OnTsCacHLEsDxJEsrrXDDn0QsCxHVQdSbrf6+voWmcxNy07XK8icDsgKsUXcsRUtiGg0SolkkkbvPvLk7p06/6xshXXV64u/+WXBQ4NH7v/MlFumdHRje6lJSyYTMH6/WgtP56aJKkVMfm9ta6Xs7QWlpaWGiDD1gTveeOOhB0cN6NHjkbxQDlVXr+fFq1Yed9uTT8+NHHf6QQAwy53vIFyPO5D6QwtKnCZTR4qsWsXd9giORCKy+6Duaz+e+eJpuw0ePKG4qN06EiJRmUh2r07YpwDg1WXznPkOhpwwWVMDjM3EJokqO68HAGBaCWt7g7uxABnDgVdfeuKFdm2LPxJWMETMhgTVZJyc9GUUAXBisU7+VUugiZyKfNJva6bQt6I5cBdimGmRiLSVEkYrGK0Ea505z0FfrDoVuG45NF05SgnfJkbpW7HNcNzzZZq1ArMGkXDWMfqRzJ7B1OS2CDZNVD6lPJ0P1Wr9be9wrDsvy6UhE/BSyBy0LJNoUswuW62i/1Hjz1vAOm/ePAI27Dnu2LEjDxo0iCdPnszbxdq+zUI6Z60Bpwo2JCMGZ7oZtgCbJKpUopmXF9dY4th2img0KubNm0dlZeUExAwRNWsFiVt9hoCwjEQ68rRp28kC0maBG3KqJBp1IbRUonoTOJVwH0cuRbW8YteScPKBZgkgpv15QQFLImmrvLtvubvL0nXre/7yy+KC3Nxg75Ur11BVVRVkMMg9evSg/KCsEcDS3r27Lbvgj2cv6zSg4/qkHVNlZSk/sIxGN70XzTaHEG7Gf0PiSSKRzsh1EsBBSKUMbjGaQFQm/fBUIn8LPb2FEI1GxaxZs0QqmAqYnFAQUx9+us/b780asXTl6j0rqyuH7rL7/gPr6us6MZGlnKx6aGPAxoBIYFlFBYgNoG3ITyWeffXN1UNGHfhjYUH+xwN795o95cbr3hdFRetcDvY/QFzOpAm5IS6Qyr92prSF1JpNEhWbFDH7nerbBdwsRSotLdVwCemMMy8a+v0vC45aX1l5+OR/3j683lYhpQ2UVmBXZ2BmIwQxETEbBsh5p5VKAEQwxhCBZHU83oGIOggh9/lp0aJL3z94/Kr9D//DK3sM2+WBm2+67nOHuCIS2H52BU3BaAgSEMKtAtMA2fYfubsDbDmal1znLpzZ1nTlVdsrLS01goD/PP1ij4f/89LxCxcvnfDqzFm7JZUi27bhbq+mBRELx7vnym+31hUIzpIyT1A4CyaEEO7eQs4qIdY2xzVoxbpkpzXVtWcuXL789F33POi5sfvtE/3r3//6EzLTybcLEJEGQTEbsGkszztz6Q9zyynqTWJ4KfMz5YbdNmTlJp/J0tJSE7Asc+V1pXvsc9CEBy+/+dZvPvv6m5uXr1m9e219HSllKylJSyFYkJBwqstJgJ0Njjzd0LdOyguYe2vl3IEmZkgQWYKElCTY6KSqrKmkX1csP/7RF1/9fPyxJ06SQujsTIBtDSGttsywIKQlA6EC/29BL0zjQ0uqyZvmVAKA9i0f32ZsKiJLS0u1FISLLr5274+++vqy5156c1xtPA6tkhBESkohmEkQ2EoRCOAsEUTmAi2HLznKhFM0P+tx7C31SjsGmQ0xsyUYYBKqorqq8Kv5C54cN+HknLKyR6b+Fqt9NwPMAHKDwRk5jJVSWMjLzZ0NALm57dK99CvH7L5uLST+Ns2pjPfUbaNQeZtmA2X6zpvv7L/r3oc9/Pwb77w//9fF46pqqxmstBSCSQgLzMLfRv86UC8a4BFSmtzYgKEBVgQocvbW08xsUpKe2dFL0nMAEKxQKNdU1dXqL3/4YcpFf7piaFlZmdkaVVU2AcMMfD7ntRuX/Tx34uJ5H058/vEp9wPAkUd20YCT+pLmyH5sRfHXAFvN3glbpaWlhpmx/2HHXn73E899vnDFilNr6mpYEGsphWMJ+0YnvVQ0ndjhffaOpEUdkVZaGGYpA7lWIJRnAbC0UpLdQrLs1PFTBDaOPHQmw9liGUISuKq2Ohj7/LOrmBnTp0/fTsSgoyrAsVIbzLObHZ5i344uuS0U9a0HAiCAmDrhhLN22XHEmHuq6+P7JhJ1kOQst2ewZPZVXvCF3SlL2KXfR+eYMRqd2rfjTsUdFhW3L1pQkJ//kwjkrFy6YllibfnqrmDTsy5heiSU6mkn4+1tbQvtOhClIAMSxMYQw4AAycxcXZ/YD4A1d+5c22l7WESjv0FF4iYj/VzXBZIJ/yr7NOduETTRT5WJ3zhMQwAgCHrf/Y8874Ov/3trXSKeS6yVJaVkdvQl5+3yLasn+Fx97jJ1j658UpuZIaXE6ooKqli3vntwRUG7kGV1LsrL+XrnAQPKZr9edqPSGlJYePChZ9u/9dY7w+Yv/HV0ZXXVYdWJxJC4ncgBawSk5TyfQUQElqLj1df9Y9ybb34we+yR4fKkHTOlpTFgO7QMgwhlLal3WNVWC9NACED5COs39KZ7q2OZ2dp178Pu/H7hkvNtbWvLCiRBFPTK46QqvKQsUa+STKZi3TChgkDkKuhCQgNWfX1d2zpG27XrKgYtW1Nx/KjwEf+Ivf3SNVonQyeffMxaAO8CeDcnFJx86mkXjV2yYvkJvyxZNHp9bW1XZTsl16W0uKqmmp/8z0tl0156ZX2/YfvO69yh41sH7rPbU9dcfcnPvtSlbe2NcRBMW7gptGDLmqaoZ7o0wL8BQ/cRVGDQbgdOX7Z27fkKgBBS2slE0CmiIRqx0tzB8aflZE+h74VMV3ah1MAKAluWtBN2Qq2sWHfi0nnz2gNI+K/e68DI+Lc/+eSx+Qt/2VslEwFH/DmLQbRWZCdtUZ9M8LramqLV6yv2+mHhr5MffvY/34QPPOqagGV5PPO3DHDRpv7cQLrvjfPgGGJu2YItbmMTBFmaglJz1PLiT5SWlpprrrmmb++dRv63orLykFzBNe3btvu5Y1G7J4btuOMD3Tt2rFLKZqfYSWbOPNhxCaScCI24B/z/k7+aC8hxFQABS1piXVVlz8NPvfCd8ZFT9v/k7U/aP/jg0x1HjT7i5PkLfnlwXdX6dqvXre+xpqqqo1I2BAkYEEIBq7Jfj+5fSmlRwAowMWuVrFfraqpyv1+4+O+7733ok26jXUt2i0He4lGk/QC8qb+ysjIDgI27jMYzODz3gnE3VkUsJrakPmjTLvImgzO+tgjYrc0zY8aMLt9+v/C2wvy8D8bsNnTCKeMmDF3y3Uf9R++2+/0r1laOWFq+Ol8I4Z7vOS+zFfGskBIhXZLHz71SPpp06UfXKhRg5uVrVw/7+Kuv3v3j5Zf8dMt998//ddWKR+PJuvaCDVuWZCsQYBICxhguLGyjBvTpv7Q+aQujtZfDLxmwpJCsjU4uLC+ftP/Bx0QJ0Fu4+pecsBDYWzwqCDonFHIdtZv8E8xMnYvbCdZ2BtdnAIW5BcTMJKVMAqk4qoBv7WATG7khhC0gpnoN2uPBOm3OYG0rIhIJW4kBPXsu/Sw2vT8Rxb166Js1RD5MmzatIKdPH3PUyJF13rEhI/f/6+rqqlJb2RDE7BakS5vDXnDFU7K89ba+QGm2KGSfEp9S6lND4QZq2BgGk/M8ghRCexNCqUiP8zwhCEobxwAQnnGQIlIQgW2lTJucPH3quAkDS2++auFmVVZxKxnCuW/Oscedve/i8tV7JOL1I+1kvHdS6RxtDMhdP8cmReC+InRO/yRRoDYe763ZOJErBjOY8nPyy/Nyc9Yn6+qWlhS1+2KH7t2ef+7ZBz5hAIhGBZrY5qYp6vq3t4onTpzoJefLlx56Ke+Ku//50Mp1aydq1kaSABtnl3YnpJK+rhFXZ+pbSur5aoOSTzyS7+yU99whViGIAOH6StlIgCDcLFiHGzpPMNrAEoIBYmOMyKhd6hA/SSnZBoLvfP7JiQD+7tapaM6gSpSV6RcfeaTon0+9fM4OQ/Y9NW4nBrC0YJQNpZKuKBPO8rmUHy4z+SUVfjIMQZQqlOZIQUJNvK5jdV1NRxAGVJUn9l+6bt2lu+x5xLSJR+x/8bXXXtLkrXM3yYq9tzjDn/4buBS82NkVV1xRcPW/736roq5uomGlBJG74yccDpBBOx534gb5++mCxWk3aLoDaSUrw13jK2XnvtjEjsnoHnMnynVnOI8XMMxkmF2CovQNXK4liEgbzVW1NQdIIRCLxZpquxOcvE19yNjjJl5029Qvf1m64sbqeO2ApJ0wOlGnYJS2hDCCyAjAEGsDZkNg5zs5/ws2xnGusXF8bWnbht2+ExuWgowUUgOskiphVlaunfhY2YsfXnjhVUO8vRI31ehNp764D6bUgAEE2ug1zUdUlJWV6gNHHNj2seffeEMTjSLWNpEIpP1yzjO98pae8PMmzmurv95vWig3YvD4euI/zS81s/2DKUnqKvjetn9pSzLtrU9NmnOe0EpRor6ur9I6l4jqm6A2EAAKBiyzyx4H3/nV/F//bBsbgo0SJASEFMzG2cOehCGXAzltc1+2VDltV0VwB8kNVelsTckrZEyA8HZ9Nsm4XV5n93x95nv/mfnIi7vtd+r4qqzhaYBmKereW9/CyS8ElPJd0bsK59dXz9DAKBhbMRBITaRvQDz3Crkjwumf0gMGP/1kKuq8idanNDVOE4WndaXeaOdUQwRNIMWA0cZw0rbZVraz3R6giITx2q61Aowq/P7T7/OaNiYQAcsyfYeMfnTJmrV/VjqhhFPV02KwgCDDzFppQwYkmaQ0gDQM939yPwupmSSDnGOpc5zv7P7GEM49GFIbTXA28YRrFSfX1yf6XfbQ/VcBMAiHNxrPaXqYxmMRrhxuIRCcan3Yebf9ptcnk3sSGcUQ6Xa5bMnvq/Mxp/Rp7BCYV/c+zbX812UWmPWOpUnQcY4i4x4NoI3WYEASCYRCuZBSIhgIwCKGnUzCZiINiHh9HQQZDZCQUgLSWrvT7jtVO93aMJcKh8NyzuzZaujeh921eFX5yVolkuSsVocgwVorNrYSeXn5yM/JqcgJ5fwkhFwJmNTckCAIiIwOmEYcjM6G9M4yLmKQUsm8unhit8r6+rZQ2tnagyigQWZdfeKcx6f857aTzptQvjFOu2miMiZj6BtOyxYgHJZyzhw1fO9Dp66pqhpNbNsMCqR3WeCUqPGLonQTfJRGmSf4bDlfyzMFWVp959R3j0OlarVTSt462+gJS+YEJUJWYFmn9u0/KSkumZ2f3+arIYP6VXXqVEzV1Qn++rvv26xas3b4kqVLTltVsXYIw9hSBgKBYM58KUQSzlxuQOGNyFisTO29/7ixC1asutBoZQsSAcMGxMyaDYI5eaJ9ft4n/XvvcM9lf7ngrf3G7FaulN347ZoJISTuvOuxXnc/PPXR1evjYyzLMgCEYGPq47WFr8ZeOxzAo2PGjJHYQBnHJuZT+ThDC9VScCrwxdQ+Bx51zk9Llp3GRtlEMuA5Nh3T3mM9znNT5bKdAwAyOUnqc4ZOg4xgMxgp5y2lzGykdCS/bCSvrDSzZiIZlALt27WfOWjAgEfum/z3VzoMKKnUrmX8TMMuzmbmKbvtc8RNS9euvpi1jeL8Nu8aZoTDYRGLxRojKgLKzPsvvdTmuKtvujuerGcphGQQCSlYKU2FObl6yE47X/TO9Cf/9d1n7+Glsqle11vEfDJa05/+dOKiy86PTnp61js/xO36AnJNyUQ8zpU11aMAPBrzquI1giaupnFiNRncYgvgmqbq7LMvGTRj9pzbk3ZSS0GWZ1mlnJqpz9mCiDP+z/TDNCIaU6KMPTMPfiW94VbJzr+CBJiNYYbsVNzh253797/qhWkPTf/vJ+/guSemAIAMh8PkrRP0njdv3jwqLy8nIrKDgcAlvXYaGa6qqt31kD13e2bOzJcxJjbGxBopLRYOh2UsFlNX/vupMxRZvQWRYmaLwKwVc2F+Yf3oIUPHPvnkPe8BoHA4LMeMGWO85wHAmDFbnhkRiUTk7ff9bXnf4fv9N56s3wvGaBBA0qLl5RUuzYSxofJozdKpUmlLW1ifqnTePGJmOWjXfafWJRO5UgjNfq+tn8uAXctzY03bkLcKKSswm9AydKm0/yEt9gDWrE0olCd7dCi5+6Onp19F3agOgIhEIlRWNs0ApDf2xo4YcVZg7twHVN/evV5dv27d99f949pliERkaVlpoy6FWCymmTnUb9jos5MOl3K2+mXDASnF8P79znjyyXveGzRoUHDevHnJWMeOHMsiILc9AmmnRrNRVlbGzEw77X6gZmaQEO6KI4Yx9ibv2aSAMqftemR+2gy4nuEDDp145vq6+CiCVgyWG7prw+xEP7/M/i37GGVsWMUZffDcDN416TkgItZG69xQnhw+cNCfP5392p+pG9W5vjTjpAxvOorw+ef3KwD8xz8c+8Q/b7jxYgaIp01rlIu4/h/+w4lnD6639UAY5YSNAA0RFDt07/X6Ky88+syIESMC8+bNc/Qyp9KLdcoZFx8yZPg+f9xn/7EnXnXVDYOkcBbNuiGwzULAkpwOiXkvZWOrCBuiycveuYEIaj5cscf/+c9/Ol5x/R1/T9pxY0kp/FupOWhC07MdTI28mJ449VpOfhmXsT2aa/G5GRnGGBO0glbfbj0vee2lR+5mHhFg/ly59eKbDM86mjTp2AW+Y42eW+p62RcsWTnaNoadZ5Fl2FCOAA8f2P+Gj99j6tOnj5k7d64ggokcd8rhA4eO/me9NoNtO47V8SSWvvamPWSPg6edcuThFxHR6uyRag4ESedSj5MTXMNtE9c16YysJm2uqu6FJ+6b+uxfquvq2guCcd5GPzE1fvdM3zdSTr30deQ713cdZ5Eqeyqbz93gczkArElasmtJx+fmvPuf25kRAOaqLYlvegHdjZ7kitF4vHaYMYacJWJswBD5ebk/TZly8ye+s82JJ55+zGffzn+tvLpqcG19tVZGK6WSqrq20lq4YumkB194Yda0aa93AEBbljefoYs0KbbUtIeRf6I2b2yZmWKxmPpi9uwOS1asPNdWSSYi6du/ZwMXuoTBfsN/Ayemmks+7tTwkoYammtVErE2RuTn5K3+8wlnn6+NEdFoVG/koU0CETWl0IcJWBI5OXm92WgQmBgwJATy8/O/taTQCIdlWVmZmTbt7bYffvXdlHU11RwMWEoK6SxDY1gEkBAiWV5dO+jeqY/eJIhMqVuQpPkN9/5LU1VTCKYJOlVWTQvGZglB16+Bq27998SquvoiIUg7DjT3thl6W6bT0nto5nOzzs1AWnti1zPRyGZdDa4BoKW0qEPbNg+dfMExa8Ph8G+yc+cGwQydoZKws3xMqwptGL0WwgLADz/xxNg6hU4BKTUbY6X9cc44CSkDhpX5demiyOVXXNEeWYVkm96e9Efy/etgwwZKE8M0vnd7M9WqWCxmmFksWbrs9KSdZOEExr0HpE/MYFleAJdSalf6/0y3QkP7L23NNbitT2z6t4YzhmVQSjVk4MAnANC22HhA27b7fpFLIwKhvDwJAIuwEACwrnLNHrad4HT70+pBirkYZq1Vm5Urq0cCQCQybbNEIGW/36l6ZeENXtPEB22Zw9OV6eaKKyaPrEsmhxMMQJCZ1lpj+hSBQEZpQ5aUzndPFPs4nKc3ZZJX+v8UmTUQ4+msByIYCKKQFfjhoYfu/AFwKv9uUcc3E5nimRsMi/KXW8zi4P7+sTGA5C1ad9VwRjaNJhFV5o2bZlb64ZT2Ab789vtx8WQSJITOVrMzFfDUo4yttejSoaSyW+dO1dqYlM+KssRZ423axBBw+v02xhgiAWlZnwsiBjYeNP2tQFKkHLQMwGgFu75OA0Av9AYAtG1X8qUM5JDnwk2va3TJkZkNs7BkINmhuMNXADBtWqT5L4j7pjZ3vpvNEjdP+sUMM9OqNasPUspOvVyeHpDSB1Kcy9FvGBAFOTnzenfpfM/SFStyHGuf075K//a2nP5r3KigtCchdSidzuMt0SluV1S5ZXx5C0AEYsNGKzd+744HyUJBhEUlNRoATRq//8v5FlXZSlsAtDOGaWWXDdvMoB5dur56x+1/Xw5Abo712pA4XO7X7Osagd+30tyWeaLvwQef7FZTX78LO0apzyffqHPTMEi2Kyxe+K/rrzvmm58WHGZrHUiPi5vZyJm8n4BGs6k9sbiJZ4JIQBpe28wuthDCQmkDrcwiywqCBLEgIQwbJOzELtoYC3PnqkgkIk4//fTV3UvanxoSkhU76woNswKz0sxGGRPs0q7tkglHHnaB0nqz/VSNO5c3jWYVkt0cePU1335v5lBbcw6BsiwRztamjNaa8oOhtQcM2XXfux56dF8D2lWQUJTRGD9vTjs5U9zK93/GUKR8DH5dzmc0SxHcog5vLsKO8ZGf3+YHIS1mMAwbwcZwVXXVjpde+teh6UZH5OyZr74wfKcBR3cobLsgEMiVAStoSStgFea3Fb06d33l1PHHjb744rNXuIr85umGgoCsEJlpAn02OfaXYY03o4leoHN1RcUwW9mOlznLtPfxQTbGcEFuHu8xfPixDzxx55IeA3e9qr6ujqWUmVp66v1zbpYt8gjkbtRNKf0kI2O0Ya9AglAbTxQD2Fi89DdBpGNHLgPQoaQotnjlMkoYR8G2pNRxQ9ZHX/73zwScVLZgQQCYa7sVZl7hZcveOfTcK/eyiEcktKocuvNOc/91298+u+zjtwBEhVvndDPhpgulMkid3eM3hSYRVZb13izEYjEQAUmlB2njpkb7+RSn28wwOhjMsfr36n3uc0/dP+vIY04c++UPP+8ghDRwaha4V7kU1WBpOyO18MCzCLPSYPwE5ScpIiLDDK1UHykIOhbbqqqVtynRK8899Hnvnff6ud5wX8uShogsY4xZvGrVpEknnvX0k08+8MagQYOCZWVlSQCSunWrA/CO+4d3pjvdiUajtCXWq600DdrtALj7TKZViyZIrma5FNLLzJsFI4VAXTzROdv+zRRNrMFkdS7p8PC7b5T9m5nFgoWLJyWT9SylMCml1UV6VYyf4l2Vn/25UQxqIO4y7E3vjsRao76+dojSJhep6rlbEeGwJKJE5/btHrWsAMGhcxCYamqr6KOvv332nNMu2dkNKMtIJIJoNCoikYgMu7uSukHvLapFGolESErBtlLp4XVfYLnhAqIpNC2gjHS+koNmEZYJBIJgrbqxURBSpDyZzrwzCGSYSBTlFfz67K3RiwaMmkFlZWVt6uJ1BxqtiaSQfo6WagF5rUM6sd/9lRmQUiKzMmGWHuWpZQQwWABsErbqOumUc3YF8EEkEhFbtYiZs8qGzhkfuXfyI4+eW5Oo7UKsDQARCATNuni87dtfzJ39hxPO+tML06Y+XVZW5l3pMocwAeXkrNls9sMBR7ERZWVl6s47H+x028NPDIKTUiaISJOQXNKhQ3JTd2o6p/JZpM3lVVor1NbXOnk5KQ8wUnOsteKcYA7t2HfgqQNGjaoCwM+88M4+WgTaCyINb/2nP2/K/ZjplHcsPKUUF+bnxzsVt6+1lcpYVeKXlwykcwABCCKT1Aq/Ll56DACUbeG2r5sBRiQiTr3o1PX9ena7xCIptNbaWd8ihCWI11Wvazdn7hdP7TLqkFdOO/Pio5YtW1YStKQhQAMxtfl/UMFAwAQDlnrp6ae7Pv78Cy/WJeqLJREzM2mtKSAltSvI/xgAwuENd6IJOeped9PKcXOXaBnmzIwJv/5DpIiEVdym4JnXX3401qtXr5xFixbFlyxbup9t2xAeY/OIyK2D4Peie2nB7n0NCSn677DDhwuXLhtAQuQzp6SI60H36WMZbSKptcbadZUR/pWvoR0oAb+zfmugrEwjEpEz//PMczsOHR1ebcy5zMYmRsCwIUHECWXzktWrx5ZXVIydc8Sna3fZ+/Dv2PDiyor1NUbbIEEpxcIb9jT3cOZCAIBwF3MJcG5OXm7PHp17VdfU0cW3PDBkXeX6YkHMLKQQQnLSTlJQmPjYQw+e+eK0RzBr1iy9oTSeJtWnSvl5vIopm+NlSC0XN2nuYJyF5HmhvJqxBx521TefvEeLevdWcskSVFauH6FU0l3kAXgavi9JE+7htGXHBAOmnGCgdtddBj/17Y8/TiHHn5XV+8YGw6UqIXR1fX2PfU8/6jgAj/qXm281lE0zBiS/+yJ24agx43v+snLZEUbbShBJkCASRGyUrrXjVFOP9hV18X2dKngMNtpZvrahtA+/pHDzL4iAqmQlln61GgRASAlpCcNaC2YDEKlgKC/QtWPXh08/7fgliETkxnLLmkce7Fdzmw4pJCwpKW2dOQsdDZxtnnp27frQDTdctigcDkvEYkppHUraqg87FRF9a83TY+UfMy8rkYg1kaCCnJw3BMyXDAqxW9SKslc3p1hcptediCiZjPOqNRVRXsy5cPSWrSwGnS3WiEh/POvFcZ0L204JBnIsZZhAUK7nV0oZEMFAgIm1ZpVQrJMKRis2SkErxVopGK1gnM+slWKjFbt7tqV/0wqsVTBoaUsK7b66gkgAbGxb6UC7NgXzr774kmsZEBvKXvXQLKJKvfDNtCuEkxNke2vSvJfFMMv8QLDmpKMOvw0Adex4PgPApZf+vSuk1dkfzfGvdNmAPxzMQNCy0K9Xn0cSKtnN8d1RA8sx9a5yFmU6epsQUpiqRLz36JPGXQVAhzexePI3gsM6icz3c987f3CP7qcV5hYsI5KWdkofaRLOQlZHlSRJEFIIKYmkBAlJRJLc40QkiYQUJCSRkASyAFggYYHgfGa31JHjeVVM0AYyUNKmzcoD99nrmCOPHL0uGo1udM0i0Iw66p6vgqipV6UgE8kEBGixY5U5woiN0ZYMUHFR0SNn/fmspUBElJV9xwDw00/z22ujg+kNwNPUlJ0Ckwaz1kbmBqy6115+cuaqNdVtSAT8vzfoVcoGzaqRJEgI207oZeUrr7ziiuuHx2IxtY3qpDtSyhjxzlvPP3LBKX8c1rltu2jb/LaLcnIKJJgsw5BMJJTWpIwmpTVpo0lrTUppsrVyjxnS7u9KKcrIwQIAEJRSTkFTGRCG2QrKgOzeqetrJ44/ds8pd/79u6YW6Gia6ZnhXmquJAgTcwy5oeDilBsJgAHLXMtK7jVi5JQvPnqbotFB7OwvA1PUsV0P+tkhPPdtSz89LeoyW8RsiCAL8nJnE1HdWedfli+sxrqXrsqSvq+PWt3QrBSCqhP1genvvvcYL+Y9qCclWqpsUjPhyOhIRF566dlrAFz//fur77jqX9fuv2DBL2EWGFZTV1ccCAS7QFjSWani2Szua0Nev5yAsLQCsqq2tiiZjDsMmgha2SjIyasNhfIqhLRWFeblfLlD127Pvvyfh94r/fA1NKf8UbP8GelhbzphhcNO+nVJcfv5wRWrYCfrQcyaSMrC/Pw5U+696Qe4lfTC4bAAgPLycmil3AHJ1rGpIdOBwwNDoRx07NDpXQCAVnXaTqR+zfRRZb0aKU3f+84AnNJT5evW7TLyD4c+KIQ4kYgCcFblbm3Cgi97U+y0T4dqAC8DeDlgSTADtlKFWOd0a53vsna+79XVlaKNams++/79fhdE//pZebyWApbFzKyJhFVUkFf6zSfv3RMIBOq1UvjcuYyA5nnnm1mgY4MHNoiOHTsyAHTsUPypRQSjjTDGsCSge+eOTxtm8ogp1SghCIIaElTWo/3EzczSkhKdOnb+AAAq161bYmwbQFZBAffKtN2YKfr8DyASFmDU0tWrJoX3H3ebILJHjBhhYasr7ikwnFQXcsWxZSstlNYgoioqpkoqpspi35//e69eReuK+1LlwmW/rDfaFzBghrSCWFdVXUtE9UqpAAMp77y/fHZT0LQsBc+V4OtZUzHNtRT+dM4p34UErWdHZbGCgdD6MbsMfxkAx2KzMszTwvyChJRWFpvKJoSMFdPMAAWkrDrxiMN/AYAhQ4ZVhkK5qQX7G12tnwo/ZforHAZGlmGlflyy+OKhI/e/wK2TLrHtCAsAsevpV/D25GhCecZp06ZJZqa8vDyLpEjPo9v/kJUjASaEwwxAbW40oRkq9+aNoauDyGHDhq5r07ZodiAQYhIShfn5H177z2vWApCepuzlhCfq6pY6e8KxV/XAM86czw3ImwyRQChgLTn4mIPXAsB5J4xbHMzJqXLLFWalWfldCX4fhefd9Xxqnk4ipK1tvbxizd37Hzzub5aUCtjSpU8tC2/Fzsb+vvvuOyYitpxqySDmLA6hGE1YJLspNHE1Tarpm/WQcDhMxjC6d+owg4wmYydRmBd60xgmJ16ViV13HbqeCHHjVHxhr5/evw4HaeAORygYXBawLA1AFvXuXZmXYy1O+foaV8Uyb+F5MDwPfbrfRIDQrPQPi5ZeO3zPQ+5kZnb1wO1114wNI5lIx8l8r1wTkjqbhK2yN82sWY54O+7Qw14MhXKqQjm5GNpv8BwAHIl0TM2epwxee+2ly4UxK4iEF1xJB7RTFeu8q8h1UxBY8zKlNdCrV0AIwQW5ud/4PWuZFqz75w/CpIgpy23vzoAQUtoqqZauXvXnIbsd8Prtf7+9SywWU24AdxuKw+bC3fHBn0kLtFjZzWbcxicymvlwRwSGrUlnnbCqXWHbN4KBnPr7pt72HQC4tb0z2mRJaefl5c8nEgCY/QTUkItwynLr1LHEAM4CAWZGSXH7WCgYbLxIm9835Y9qZNFS9pVCCEvppFq5fu2h9zz3/Cfjx598BDkBWf6f4VpBIP1iIeWDbKmdSZts/WUFM5r9oGh0jGEGlbTNm9K5uPBzS0qv+FfmvIXDQhuDgvyC2ZYVcJM2HYJOC0H/853PUkr8umjxfADIz+9oAGDMyOHvhaygzYBFGXkN3IAu06k9Pn0tlUqbngC3CJtFYF1VX9Pjs+/nTR+175FTpj/1VDuHa4G2tw0lNwy/5UsttjP3ponKZzZlWgvNgyva+O0ZL84ZM2afc9wtKxqwkIjrghjYr99MS4DTtRb8i9mzlGw4m/WUtCsqAoAOHcoNAHHBpRcsLGpb+CUcMWoyepEKIrrHfMXV0v1lHzlnOEcBQAqQidtxs2DF0nP/fNM9nx12xPEnBQOWZ5l5xLV9isWMxDT3cwuFzTdJVMZ9sj961pQ85Q2BiMyNpdfMc782ICpXHNLjU+/8LCjkz3AWfps0MfjlFfumjNC+pH03wElhDofDgoi4a8eSp0LBoLO2yz0vY54zBjf9MV2msXEvl3umcEpyG1VVX9v3q5/mPzZw2L7v/2HSWQcHgwGPuBjhzd+S4zdBMk1LnBrDrbiHsqCGCscGi2k0EZsYYAbCkohUcXG7l4S0gKwNclLB5dTScMc+W7FyVarwpWccTDzo4GdzgsEqY1i6tRbd+/i5nU+8ef/4iDWzcX5LNAVLEBmlk3rFujV7fzD3yzd3GjY6Nu6Yk49m5iBivi050gS2zThYEomU1yRVqhstt4lkE94egdSKirQDdouwKZd/NOr4qwb27HZfQMqEYcjUbHrPp5QiBAaRNga2Ut2kFADgVVmRJ59/cnnHdkWvEAmCmwPkxbvS7tPMDvm6mvrNLyUytTpndphZEJEUIJNQCV62ds2+X/zw/Ys7jRjzxQGHTLju5uvvGBiwpPERGMMp72hFIhEZjUaFW26oAWNkdjzoLWcIhDI5s/tibsX9/uDjE1vsF2sS3EGXTz819dedhu378qpEYqIQUAyy0jPrm1aXPgzJ3kpp6S5LokgkgrKyMuw7fPity1evOb62vk4IcrcMocztNbyqM5mVTdOf/SuACUitAkrD0/jYSUck6HgiTvWJ+ODK2prrf12+4tpBI/af3amk/Ws79t3hvbvu+se3UoiM8o6+HUQzbFCXm+h0W7d8HvxvaKqnW9+lAHh9bcqCwi1FNBplw0yjdh16Q0FevjGgxiuNpswzRtJO9nj3lXdLAHA0GiVHp4nIW+664esenbq8BJAAwds0KHVxeo68Y36C8h/3PdZzlPrO8ZriqvWSnP2QjNZJVVVXHVy2pvzA//780x2vvDfzq51G7vftiL0PfvbQI/9w6XEnnn3QtdfetNM3c+a0Y+ZgwLI4FAxwMBBgZg6+8847nc4556JR4QOOumHSH888133wZpNAMLv9XjdayPnZNHaaJSVa4k3ZFEpLSw0iEfnIw//6ZuTow+5fuLz+XGatiNwqxo5X1JtvAmDi8UT+4y+/OhDAKm9ldDQ6iEtLmQ7YfejVS1etOKI6Xh+wKF0WtxHbFplElNn5BhVZNgBf0wQDwin6wUZrm2u0bdXU1+20tpJ2WrZm7R8saeHTb77Fs6+8XCHAVX12GbU+Ny8P9dVV2Gn43oUKsqgunijOCwTf79m1x9FoSPWbD3dRCAHQLURVTaz6wsiQClurwE7ZIDbM4o+Rw64rzM1dY0CSSJi0cue2jhmCyNjGYOny5XsC6ZXRpaWlJhKJiNKbSuf36dHjFkta0jC7BQb8ZYayOVS2Ig9kc6bGPnljxb4jaTuVJACLABYEQ2Blq6SqT9SZqtoqVFRXF6+pqeldUVMzbMnKlcPKq6qHrVy3vs/a9euLLaNe+fW7D0c/8cS9a5HhiW4+kqm+pFyADRenbAGavItWmlPSb7KLVuMoNZFIhC644IK1g3bsf3pOKI+U0ZpSbMNjU05uua1sVKxbc4gUEv7i966bQr47o+wfHQoLvzdMFsDG21nC05HSPSYfH8uaP3J9WtkpypxxkyxXRAN3MbGTkmM5jlSHk1lSsCWkARsj2GghZCJgBTCwR/dXFv0491htjBfEbgEu1cgt9FZyKfCWx5O3CGVlZTocDluvlj3+SvfidrdaMhBgsGroFWdhjEZldc0e99/1RFcA/m3EOBKJgIjiuw8ZfFJeMKg0uxZihrqU9tl4wq4hl3KPNTIn7CMez3mR5n1p4vTvuuVx2rTlxwLMUMZQKBAM9e7cdcpHs18/mogU8BsUYnNXcxEAEdiaYRofmwQAtNyGR01CLBbTDFgfzXn9yk5ti14gsgIMKP/2aAyQIFJJw3nPTX9pLJCqhgwgTZwPP3zv53179PpLKJgrtTEK8Ds6fYTjiVbvu59rZXTfvcovkbP0Xy99OeMyn+jOOMZQWhuRn5Mndurd8/KvPnn7fErXp2y5gW+EM8sWEkHNu0sL+ak2AwxAE5H56tN3j+/eocNn2sAC2PYPsyBBSZXE0tUrzmBmkb1ZYywWU+Fw2Jr97gv3dihs8wCcjYTsFDfJUH890epxL6/zjelVPsJi70j6jLSQTp+UUWzEEaWsjVbKGKt926KVo4ePOOLdN1+4xVZKIu13ayEkUi1pzDG2pWjGbu+OszHt1t/q4Gg0SkRk31R66WE9O3X6lCEDDKO8woQMlmyMqaqpGTl+/El7AekdTz3EYjFtDMsvP377vB06d34HZAUYbKeX1afJwEGaa/l1y9RvTtNSoi8z+OArmZg6yFkVKAEwK2MMhYI5Vo+OXaafHDlm5DPP3P+6m1KzxSW3sxFEqJFU/5ab1Obzu21GU54+EaWDDjpo7RfPTR3Tpbj4BSLLMswa7qaHgsgklMIvy5ZeKQSxr4iFB2ZmQ0TmkzkzxnYrKXkXFAgYY+zGp24T85kintSXDH0pxcIofa9U5ItZazYMElab3PzyQf0HnPnDl7PGXnvtJcuclyHW6NZnLYeGdb1aAk0K02Q0g7DFGx5tGZx9fKlnz/p5X8QmdC8p+UfQCkrNRhCgiEgKQaayvv7wP/zhzD0BaGRxKyLyuF78y4/eGtu1uN10wyJg2KjUC+xyrbSUSluKjsTyzEbnZ29/5RRnS6Ukwzsh9WwCaWMMM0jmBELo1bHz1DNOmLjrO9OfeSiRtEU0Gv1Nq80kkchUYVpYn2k2p9oG+lQDOByLyVZKfPHR29cM33HH8W3z2iyDsCwGsSDSdXU19M2P824LWBbQgFm594hGBRHVf/vZe2N36NL1vkAgx7K1cfyAXrA6Szny+59ScIkss5pb6h/vFAagtDFkGDIYzKGOxSWvhUftOXruR2+ece21lyxzY3tbvLVac5FWE7ea9efrH7fovqRbCKfeACNsTX/5yZfOPuaEkT07dXsqIAPCtlXAGJ1cX1u35+FHHf9HwLH8GtyitNQwMyljxJcfvXnezn37n1+Qk1evDUtmVk4ivN/yy/zo6FA+sy9L6yWQAVgxG6OMJkBYecEc1bNzt+n7DNl1/x+/iB359GP3fMAMCTjbrPxWo+VHECFP/mZxia3kp8rwHpATGpFOib7thL6cJemXl/5p5VcfvX7iHoN3OqhjUbv383LbBBVJfP/rotteeOyF9rFYTKGRlBvXqmJtjHz79WemHDBi+J4dCovmSCtgGcd3pABKe/F9flef7efWTYMGswJYMRiaWYCkFQrliuI2bZf27dbj9gmHjh359cdvjp027YGZSmvh+tKatNVbS0HZipz9b5Bh2eoWcqk3YTWNT5VzOVXCtg22XrBmk3D0DyaljXjhhSfeWTDv09F7jRgxvkNh2xlV1dUdLr/5ppcvuOCuEJwsgMZeBgaggYh85Mn7v/7+y9nhgb16XVAQylvKEJZxHKvOJqXMmpmVYaPYsNHGsDZOrQIGJEhaUgSsnEAu2uUX/tSzY5cH9xm527iP3n158EexVy+5446/fq20Ft7egdtiV4nKeKU2zG79zjQJyC2sRO1hk3cp6dSBSAhXMXUSRirXrW/3wgtvtQWAyZMnbyccyxGHkUhEJpJJmvbkfS/9MHfm4WNGDt+1pH3Hbyor5x8Cx8u+kfaW6aijZ3HsrRfuufyPFwzp3anLVYW5+b+GAjkkhaRQKF8Gg7lWKJhnCRIiJxCkglBuvKigYHlJm6IP+3Tr+ciQATuec9joMUPmfz1n8OcfvH7Ws4/f+0pJSUkVAOnVld+qZR9duEF2+uyzuSWJZJIEkYFbnJJA6NalkwE2tuvMFsLTQfY5+JhrOg/ay5T0H26X9B/OxX2Hqm6DdueJx591NADaXleQuJwg9dLMnDmzme1MW4y8bFnepFMu3G2PPQ7f4+TTLjpu4onnTTrx5L9M2jt85D6nnHLhbjdF7+y5atWqgoBlNcYGrUgkIrdkl9CWgjdX+x8e+UeH/iO4fb+hdkm/Ydy+71DVecfd+OCxJx4KNPTttRi8G0+YcPqYzgNHcnGfIbqk3zDuMGBXVdxvOO+y2wHvBwMBACMC28OAbQgOZ9hswqdmXksArPB2kDKcDW8+F3/4bfHAPQ5eU9x/V9NhwHBT0n+4addnCPfaea+62267rxuwyXTvTWJjnSanEYtz9jltwg/VyWQPy5IMhtBG66AVlIN26H3te2+U3QAn91pEnZ3GtwOnQ2PIiBw3C9FolLw4Ys3AgYS5AEYABT/+yIBThGTQoEHsqGzbU/8ZkchEsWDBAjF37lw7LzcHu+y+30s/r1gzTpDRYJZsjNYM0amoaOZPX84+QBsj0WLrahqBxy73O+y40s6D9uSSfo4ILOk3zJQM2FV1HbQXjwoffRUzb5cisBVpvDFtWvGoA44u6zRwJLfvN1S588jt+w1VnXbcnQ8/etJEID3nW4KNv7pulfvHHnuh+K83//Obqnh9F0sKhrceHczCgNrm5XzTpUOnqf369vuwriqxZP36FQY1AAoA1Lj3KvDd13+swedqAG0anu//3th9tgT+tm7kXm3c1jX5d699jfVpY/eraeygiw21r6bhOR07dg8qZfdesHzxAasqKs6otVUP1rYGWLrlmrUyRrYvaPvJT1/F9nbdK1tsjW5aHrjVeccccPS4+SvKX0rY9bYkYTGY2BgYNpoNy0AwB6FgCFrZ1UZpMBt3cYHrMPW2omAvQp8u7JoqX+364zLzvzOjU/5EAs9XlK6uB9frnfYgpTIvUxVcyFcu2+dponQ7MgqMpr5nHmoQGPa12XO9ZK6pzkyRSa1QaiT9xVddPBU+TEeLstrmXZNxzM3XIiGtYDAvadtQOglBpAnu5p0Eo7TmHCuY3GfI4D3Kyh79b3Oq5W0MTVIywuGwNWf2bDVqvwnRhSuXT66P1yhLWoKZhTM2wjDYMLMkgDhzGLImMPvh6V/TE9oQ7NvywclPZ7e0c8ajnHPhnxSP8jjzvMw58LUzc1D83xvkQ21q9LIvziCozPP8qc0NmuYd8295kd3HjIPpzFVjDAsiTUI488UMIqGVUaJNXhvapV+/E1978bGn3A2UWkSXao7mKoPBgN5r36P+9uOyZdfGk/WQIEVCCBAJr79sDDc2K+lKm403Is1x0tdx6irnjBTRpV5h32dk3iCdV8/Ifmyj9OAjLH8qS2PnN0kT3wBB+R7lUYrX2ozfGzwjdY/s/vjOTrFq93V1JAU52RuCQWSM0TAgmRcIJgf36X/aOzOeesqYYyXQcn6z5ppDggBzdOSM8V//OO/W6rjdhwlwXf46zcezJjlbXqV+y2Ix/sN+eZjNzZB126xGZnKUTGG4wZn2buQXxfCTmf8UXzc3VgQ/ozP+Y5mPzGyzn8+m5Hnjj2jYA18j0786qgpLkhYCVhBt8/I+2XXwoAufefyeT+FEkVvU2tsMGzsigTI988WZRdF/P3BaRdX6k6pra4bG47VOREdYSOkJ/r0+vKdtiGv4CmZkLxPgRli+X0/KTCXI6pKnb2RN6AaEbEr/8W7LG7oiS6FKc1FuSOx+qdVA/9lAe3xjlX2/Rl5FpEOHmQ+T0kIgEAQZlWibX/BZ55JOU95+7clniYhbUuRlN73Z8DeGmen8868Z+uuiX4cE80I7r69NSqOMs4TaH6AU7lJnY2Ag4K2oYGcPQLg1E1Lwa4veIulsj5xTN8ZkHXHOEu5eJ+lz3N/Iu6eA4Y3opCTSi7OzzvMv2nZSy0SqccZb0A4DIZ3YWmonL87qGaXHQZD3rMbakj4uSDQYG/8H/5Dn5oaQlxusCsjceYP67fDFLf+85pekU1y3WSWstyZoCzzVrdg2IGyF8kYtcXPye5xj2b96B8JZ3xtDeCO/+e8Tw6a3o/Xfq7HztvT6TZ2f3Zem3KOp2Ng4beDUMU60Y7vjTK1oRSta0YpWtKIVrWhFK1rRiv9V/B/1RcWbsMzfcAAAAABJRU5ErkJggg==';
 const STORAGE_KEY = 'household-budget-v1';
 const CONFIG_KEY = 'household-budget-config';
 
@@ -493,6 +634,7 @@ let state = {
   lastMonthProcessed: null
 };
 let activeTab = 'home';
+let settingsOpen = false;
 let sheet = null; // {type:'log'|'addcat', ...}
 let loaded = false;
 let config = null; // { url, token }
@@ -501,6 +643,7 @@ let pollTimer = null;
 let setupMode = false;
 let setupError = '';
 let setupTesting = false;
+let demoMode = false;
 
 const DEFAULT_CATEGORIES = [
   { name: 'Groceries', type: 'reset', amount: 0 },
@@ -570,6 +713,9 @@ function renderSetupScreen(){
           ${existing ? `<button class="ghost-dark" onclick="cancelReconnect()">Cancel</button>` : ''}
           <button class="primary" style="flex:1;" onclick="testAndSaveConfig()" ${setupTesting ? 'disabled' : ''}>${setupTesting ? 'Testing connection…' : 'Connect'}</button>
         </div>
+        <div style="text-align:center; margin-top:14px;">
+          <button class="preview-link" onclick="previewUI()">Just editing the design? Preview without connecting →</button>
+        </div>
       </div>
     </div>
   `;
@@ -578,6 +724,32 @@ function renderSetupScreen(){
 function cancelReconnect(){
   setupMode = false;
   setupError = '';
+  render();
+}
+
+function previewUI(){
+  demoMode = true;
+  setupMode = false;
+  setupError = '';
+
+  const cats = DEFAULT_CATEGORIES.map((c, i) => {
+    const amounts = [400, 150, 100, 60, 150, 300];
+    const balances = [220, 40, 340, 60, 150, 820];
+    return { id: uid(), ...c, amount: amounts[i] ?? 100, balance: balances[i] ?? 50 };
+  });
+
+  state = {
+    categories: cats,
+    transactions: [
+      { id: uid(), categoryId: cats[0].id, kind: 'purchase', amount: 62.14, note: 'Costco run', date: new Date(Date.now() - 2*3600e3).toISOString() },
+      { id: uid(), categoryId: cats[1].id, kind: 'purchase', amount: 41.00, note: 'Gas station', date: new Date(Date.now() - 26*3600e3).toISOString() },
+      { id: uid(), categoryId: cats[2].id, kind: 'purchase', amount: 18.50, note: '', date: new Date(Date.now() - 50*3600e3).toISOString() },
+      { id: uid(), categoryId: cats[5].id, kind: 'adjustment', amount: 100, note: '', date: new Date(Date.now() - 100*3600e3).toISOString() },
+    ],
+    lastMonthProcessed: currentYM()
+  };
+  loaded = true;
+  syncState = 'idle';
   render();
 }
 
@@ -609,6 +781,7 @@ async function testAndSaveConfig(){
     saveConfig({ url, token });
     setupMode = false;
     setupTesting = false;
+    demoMode = false;
     await loadData();
     startPolling();
   } catch(e){
@@ -640,6 +813,7 @@ async function remoteSet(key, value){
 }
 
 async function loadData(silent){
+  if(demoMode) return; // preview mode never touches the network
   if(!silent) syncState = 'idle';
   try{
     const value = await remoteGet(STORAGE_KEY);
@@ -672,6 +846,7 @@ async function loadData(silent){
 }
 
 async function persist(){
+  if(demoMode){ syncState = 'idle'; renderSyncBadge(); return; } // preview mode: keep changes in memory only
   syncState = 'saving';
   renderSyncBadge();
   try{
@@ -693,6 +868,11 @@ function renderSyncBadge(){
     saved: ['Synced', 'saved'],
     error: ['Not synced — check connection', 'error']
   };
+  if(demoMode){
+    el.textContent = 'Preview mode — not saved';
+    el.className = 'sync-badge preview';
+    return;
+  }
   const [label, cls] = map[syncState] || ['',''];
   el.textContent = label;
   el.className = 'sync-badge ' + cls;
@@ -710,15 +890,28 @@ function startPolling(){
 function processMonthRollover(){
   const ym = currentYM();
   if(state.lastMonthProcessed === ym) return;
+  applyMonthRollover();
+}
+
+function applyMonthRollover(){
+  let leftover = 0;
   state.categories.forEach(c => {
     if(c.type === 'reset'){
+      leftover += Math.max(0, c.balance);
       c.balance = c.amount;
     } else {
       c.balance = (c.balance || 0) + c.amount;
     }
   });
-  state.lastMonthProcessed = ym;
+  state.lastMonthProcessed = currentYM();
   persist();
+
+  const rolloverCats = state.categories.filter(c => c.type === 'rollover');
+  if(leftover > 0.004 && rolloverCats.length > 0){
+    const allocations = {};
+    rolloverCats.forEach(c => { allocations[c.id] = ''; });
+    sheet = { type: 'leftover', leftover, allocations, error: '' };
+  }
 }
 
 function totalAvailable(){
@@ -734,36 +927,69 @@ function render(){
   let html = '';
   html += `<header class="top">
     <div class="eyebrow-row">
-      <div class="eyebrow">Household Ledger</div>
-      <span id="syncBadge" class="sync-badge"></span>
-    </div>
-    <h1 class="month">${monthLabel()}</h1>
-    <div class="total-row">
-      <span class="total-label">Available across all funds</span>
-      <span class="total-amt">${fmt(totalAvailable())}</span>
+      <div class="header-left">
+        <div class="logo-badge"><img src="${LOGO_URI}" alt="" class="app-logo"></div>
+        <h1 class="month">${monthLabel()}</h1>
+      </div>
+      <div class="header-right">
+        <span id="syncBadge" class="sync-badge"></span>
+        <button class="gear-btn" onclick="toggleSettings()" aria-label="Settings">${gearSvg()}</button>
+      </div>
     </div>
   </header>`;
 
   html += `<nav class="tabs">
     <button class="${activeTab==='home'?'active':''}" onclick="setTab('home')">Funds</button>
     <button class="${activeTab==='history'?'active':''}" onclick="setTab('history')">History</button>
-    <button class="${activeTab==='settings'?'active':''}" onclick="setTab('settings')">Settings</button>
   </nav>`;
 
   html += `<main>`;
   if(activeTab === 'home') html += renderHome();
   if(activeTab === 'history') html += renderHistory();
-  if(activeTab === 'settings') html += renderSettings();
   html += `</main>`;
 
-  if(activeTab !== 'settings'){
-    html += `<div class="fab"><button onclick="openLogSheet()">＋ Log a purchase</button></div>`;
-  }
+  html += `<div class="fab"><button onclick="openAddFundsSheet()" aria-label="Add funds">+</button></div>`;
 
   app.innerHTML = html;
   renderSyncBadge();
 
+  if(settingsOpen) renderSettingsPanel();
   if(sheet) renderSheet();
+}
+
+function pencilSvg(){
+  return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg>`;
+}
+
+function gearSvg(){
+  return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`;
+}
+
+function toggleSettings(){
+  settingsOpen = !settingsOpen;
+  render();
+}
+function closeSettings(){
+  settingsOpen = false;
+  render();
+}
+
+function renderSettingsPanel(){
+  const existing = document.querySelector('.settings-overlay');
+  if(existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.className = 'settings-overlay';
+  overlay.onclick = (e) => { if(e.target === overlay) closeSettings(); };
+  overlay.innerHTML = `
+    <div class="settings-panel">
+      <div class="settings-panel-head">
+        <h2>Settings</h2>
+        <button class="close-btn" onclick="closeSettings()">✕</button>
+      </div>
+      <div class="settings-panel-body">${renderSettings()}</div>
+    </div>
+  `;
+  document.getElementById('app').appendChild(overlay);
 }
 
 function renderHome(){
@@ -775,7 +1001,11 @@ function renderHome(){
   }
   return state.categories.map(c => {
     const pct = c.amount > 0 ? Math.max(0, Math.min(100, (c.balance / c.amount) * 100)) : 0;
+    const ratio = c.amount > 0 ? c.balance / c.amount : 1;
     const low = c.balance < 0;
+    let barColor = 'var(--green-ok)';
+    if(ratio <= 0.125) barColor = 'var(--rust)';
+    else if(ratio <= 0.25) barColor = 'var(--amber)';
     return `<div class="envelope" onclick="openLogSheet('${c.id}')">
       <div class="env-top">
         <div>
@@ -786,7 +1016,7 @@ function renderHome(){
       </div>
       <div class="env-bottom">
         <div class="env-budget">of ${fmt(c.amount)}/mo</div>
-        <div class="env-bar"><div class="env-bar-fill" style="width:${pct}%; background:${low?'var(--rust)':'var(--green-ok)'}"></div></div>
+        <div class="env-bar"><div class="env-bar-fill" style="width:${pct}%; background:${barColor}"></div></div>
       </div>
     </div>`;
   }).join('');
@@ -794,22 +1024,39 @@ function renderHome(){
 
 function renderHistory(){
   if(state.transactions.length === 0){
-    return `<div class="empty-state"><h2>No purchases logged yet</h2><p>Tap "Log a purchase" to record your first one.</p></div>`;
+    return `<div class="empty-state"><h2>Nothing logged yet</h2><p>Tap a fund to log a purchase, or use the + button to add funds.</p></div>`;
   }
   const sorted = [...state.transactions].sort((a,b)=> b.date.localeCompare(a.date));
   return sorted.map(t => {
     const cat = state.categories.find(c => c.id === t.categoryId);
     const d = new Date(t.date);
-    const isAdj = t.kind === 'adjustment';
-    const label = isAdj ? 'Balance adjusted' : (cat ? escapeHtml(cat.name) : 'Deleted fund');
-    const noteLine = isAdj
-      ? `<div class="tx-note">${cat ? escapeHtml(cat.name) : 'Deleted fund'}</div>`
-      : (t.note ? `<div class="tx-note">${escapeHtml(t.note)}</div>` : '');
-    const amtDisplay = isAdj
-      ? `${t.amount >= 0 ? '+' : '-'}${fmt(Math.abs(t.amount))}`
-      : `-${fmt(t.amount)}`;
-    const amtClass = isAdj && t.amount >= 0 ? 'tx-amt pos' : 'tx-amt';
-    return `<div class="tx-row ${isAdj?'adjustment':''}">
+    const catName = cat ? escapeHtml(cat.name) : 'Deleted fund';
+
+    let label, noteLine, amtDisplay, amtClass, rowClass;
+
+    if(t.kind === 'adjustment'){
+      label = 'Balance adjusted';
+      noteLine = `<div class="tx-note">${catName}</div>`;
+      amtDisplay = `${t.amount >= 0 ? '+' : '-'}${fmt(Math.abs(t.amount))}`;
+      amtClass = t.amount >= 0 ? 'tx-amt pos' : 'tx-amt';
+      rowClass = 'adjustment';
+    } else if(t.kind === 'deposit'){
+      label = catName;
+      noteLine = t.note ? `<div class="tx-note">${escapeHtml(t.note)}</div>` : `<div class="tx-note">Funds added</div>`;
+      amtDisplay = `+${fmt(t.amount)}`;
+      amtClass = 'tx-amt pos';
+      rowClass = 'deposit';
+    } else {
+      label = catName;
+      noteLine = t.note ? `<div class="tx-note">${escapeHtml(t.note)}</div>` : '';
+      amtDisplay = `-${fmt(t.amount)}`;
+      amtClass = 'tx-amt';
+      rowClass = '';
+    }
+
+    const editable = (t.kind === 'purchase' || t.kind === 'deposit');
+
+    return `<div class="tx-row ${rowClass}">
       <div class="tx-info">
         <div class="tx-cat">${label}</div>
         ${noteLine}
@@ -817,6 +1064,7 @@ function renderHistory(){
       </div>
       <div style="display:flex; align-items:center; gap:2px;">
         <div class="${amtClass}">${amtDisplay}</div>
+        ${editable ? `<button class="tx-edit" onclick="openEditTxSheet('${t.id}')" title="Edit">${pencilSvg()}</button>` : ''}
         <button class="tx-del" onclick="deleteTx('${t.id}')" title="Delete">✕</button>
       </div>
     </div>`;
@@ -824,25 +1072,19 @@ function renderHistory(){
 }
 
 function renderSettings(){
-  let html = `<div class="month-note" style="padding-left:0; padding-bottom:2px;">Funds reset or roll over automatically on the 1st of each month, based on the monthly amount you set below.</div>`;
+  let html = `<div class="month-note" style="padding-left:0; padding-bottom:2px;">Funds reset or roll over automatically on the 1st of each month, based on the monthly amount you set below. Tap the pencil to make changes.</div>`;
   html += state.categories.map(c => `
-    <div class="settings-card">
-      <div class="set-row">
-        <input type="text" value="${escapeHtml(c.name)}" onchange="updateCatName('${c.id}', this.value)">
-        <button class="del-cat" onclick="deleteCat('${c.id}')">Remove</button>
-      </div>
-      <div class="set-sub">
-        <label>Monthly amount
-          <input class="amt-input" type="number" step="0.01" value="${c.amount}" onchange="updateCatAmount('${c.id}', this.value)">
-        </label>
-        <div class="type-toggle">
-          <button class="${c.type==='reset'?'on':''}" onclick="updateCatType('${c.id}','reset')">Resets</button>
-          <button class="${c.type==='rollover'?'on':''}" onclick="updateCatType('${c.id}','rollover')">Rolls over</button>
+    <div class="settings-card cat-summary">
+      <div class="cat-summary-top">
+        <div>
+          <div class="env-name" style="font-size:16px;">${escapeHtml(c.name)}</div>
+          <span class="env-type ${c.type}">${c.type === 'rollover' ? 'Rolls over' : 'Resets monthly'}</span>
         </div>
+        <button class="pencil-btn" onclick="openEditCatSheet('${c.id}')" aria-label="Edit ${escapeHtml(c.name)}">${pencilSvg()}</button>
       </div>
-      <div class="bal-row">
-        <div class="bal-current">Current balance: <b>${fmt(c.balance)}</b></div>
-        <button class="adjust-link" onclick="openAdjustSheet('${c.id}')">Adjust balance</button>
+      <div class="cat-summary-bottom">
+        <span>${fmt(c.amount)}/mo</span>
+        <span>Balance: <b>${fmt(c.balance)}</b></span>
       </div>
     </div>
   `).join('');
@@ -850,12 +1092,31 @@ function renderSettings(){
 
   html += `<div class="settings-card" style="margin-top:22px;">
     <div class="set-row"><div class="env-name" style="font-size:16px;">Sync</div></div>
+    ${demoMode ? `
+      <div style="font-size:12px; color:var(--ink-soft); margin-top:6px; line-height:1.5;">
+        You're in <b>preview mode</b> — this sample data is local only, nothing is saved or synced. Connect to your real Google Sheet when you're ready to use this for real.
+      </div>
+      <div style="margin-top:12px;">
+        <button class="ghost-dark" style="width:100%;" onclick="openReconnect()">Connect to Google Sheet</button>
+      </div>
+    ` : `
+      <div style="font-size:12px; color:var(--ink-soft); margin-top:6px; line-height:1.5;">
+        Both phones read and write to the same Google Sheet. Updates from the other phone appear automatically about every 20 seconds, or tap refresh below.
+      </div>
+      <div style="display:flex; gap:8px; margin-top:12px;">
+        <button class="ghost-dark" style="flex:1;" onclick="manualRefresh()">Refresh now</button>
+        <button class="ghost-dark" style="flex:1;" onclick="openReconnect()">Change connection</button>
+      </div>
+    `}
+  </div>`;
+
+  html += `<div class="settings-card" style="margin-top:10px;">
+    <div class="set-row"><div class="env-name" style="font-size:16px;">Testing tools</div></div>
     <div style="font-size:12px; color:var(--ink-soft); margin-top:6px; line-height:1.5;">
-      Both phones read and write to the same Google Sheet. Updates from the other phone appear automatically about every 20 seconds, or tap refresh below.
+      Run the monthly reset/rollover right now, without waiting for the 1st, so you can check how each fund behaves. This uses your real balances${demoMode ? ' (currently just the preview data)' : ''}.
     </div>
-    <div style="display:flex; gap:8px; margin-top:12px;">
-      <button class="ghost-dark" style="flex:1;" onclick="manualRefresh()">Refresh now</button>
-      <button class="ghost-dark" style="flex:1;" onclick="openReconnect()">Change connection</button>
+    <div style="margin-top:12px;">
+      <button class="ghost-dark" style="width:100%;" onclick="openMonthTestSheet()">Simulate the 1st of the month</button>
     </div>
   </div>`;
   return html;
@@ -868,20 +1129,52 @@ function openLogSheet(preselectId){
   sheet = { type:'log', categoryId: preselectId || (state.categories[0] ? state.categories[0].id : null), amount: '', note: '', error: '' };
   render();
 }
+function openAddFundsSheet(preselectId){
+  sheet = { type:'addfunds', categoryId: preselectId || (state.categories[0] ? state.categories[0].id : null), amount: '', note: '', error: '' };
+  render();
+}
 function openAdjustSheet(categoryId){
   const c = state.categories.find(c=>c.id===categoryId);
   if(!c) return;
   sheet = { type:'adjust', categoryId, value: String(c.balance), error: '', confirming: false };
   render();
 }
+function openEditCatSheet(categoryId){
+  const c = state.categories.find(c=>c.id===categoryId);
+  if(!c) return;
+  sheet = {
+    type: 'editcat',
+    categoryId,
+    name: c.name,
+    amount: String(c.amount),
+    catType: c.type,
+    error: '',
+    confirming: false
+  };
+  render();
+}
 function closeSheet(){ sheet = null; render(); }
+
+function openEditTxSheet(txId){
+  const tx = state.transactions.find(t => t.id === txId);
+  if(!tx) return;
+  sheet = {
+    type: 'edittx',
+    txId,
+    amount: String(tx.amount),
+    note: tx.note || '',
+    error: '',
+    confirming: false
+  };
+  render();
+}
 
 function renderSheet(){
   const existing = document.querySelector('.overlay');
   if(existing) existing.remove();
   const overlay = document.createElement('div');
   overlay.className = 'overlay';
-  overlay.onclick = (e) => { if(e.target === overlay) closeSheet(); };
+  overlay.onclick = (e) => { if(e.target === overlay && sheet.type !== 'overage') closeSheet(); };
 
   if(sheet.type === 'adjust'){
     overlay.innerHTML = renderAdjustSheetHtml();
@@ -894,6 +1187,88 @@ function renderSheet(){
         valEl.oninput = (e) => { sheet.value = e.target.value; };
       }
     }
+    return;
+  }
+
+  if(sheet.type === 'delcat'){
+    overlay.innerHTML = renderDeleteCatSheetHtml();
+    document.getElementById('app').appendChild(overlay);
+    return;
+  }
+
+  if(sheet.type === 'editcat'){
+    overlay.innerHTML = renderEditCatSheetHtml();
+    document.getElementById('app').appendChild(overlay);
+    if(!sheet.confirming){
+      const nameEl = document.getElementById('editNameInput');
+      const amtEl2 = document.getElementById('editAmtInput');
+      if(nameEl) nameEl.oninput = (e) => { sheet.name = e.target.value; };
+      if(amtEl2) amtEl2.oninput = (e) => { sheet.amount = e.target.value; };
+    }
+    return;
+  }
+
+  if(sheet.type === 'edittx'){
+    overlay.innerHTML = renderEditTxSheetHtml();
+    document.getElementById('app').appendChild(overlay);
+    if(!sheet.confirming){
+      const amtEl3 = document.getElementById('editTxAmtInput');
+      const noteEl3 = document.getElementById('editTxNoteInput');
+      if(amtEl3) amtEl3.oninput = (e) => { sheet.amount = e.target.value; };
+      if(noteEl3) noteEl3.oninput = (e) => { sheet.note = e.target.value; };
+    }
+    return;
+  }
+
+  if(sheet.type === 'monthtest'){
+    overlay.innerHTML = renderMonthTestSheetHtml();
+    document.getElementById('app').appendChild(overlay);
+    return;
+  }
+
+  if(sheet.type === 'overage'){
+    overlay.innerHTML = renderOverageSheetHtml();
+    document.getElementById('app').appendChild(overlay);
+    return;
+  }
+
+  if(sheet.type === 'leftover'){
+    overlay.innerHTML = renderLeftoverSheetHtml();
+    document.getElementById('app').appendChild(overlay);
+    return;
+  }
+
+  if(sheet.type === 'addfunds'){
+    const catButtonsAF = state.categories.map(c =>
+      `<button class="${sheet.categoryId===c.id?'sel':''}" onclick="pickCat('${c.id}')">${escapeHtml(c.name)}</button>`
+    ).join('');
+    overlay.innerHTML = `
+      <div class="sheet">
+        <h2>Add funds</h2>
+        <div class="field">
+          <label>Which fund</label>
+          <div class="cat-pick">${catButtonsAF || '<span style="font-size:13px;color:var(--ink-soft)">Add a fund in Settings first</span>'}</div>
+        </div>
+        <div class="field">
+          <label>Amount to add</label>
+          <input class="amt-big" id="amtInput" type="number" inputmode="decimal" step="0.01" placeholder="0.00" value="${sheet.amount}">
+        </div>
+        <div class="field">
+          <label>Note (optional)</label>
+          <input class="note-in" id="noteInput" type="text" placeholder="e.g. Birthday gift, work bonus" value="${escapeHtml(sheet.note)}">
+        </div>
+        ${sheet.error ? `<div class="err">${sheet.error}</div>` : ''}
+        <div class="sheet-actions">
+          <button class="ghost-dark" onclick="closeSheet()">Cancel</button>
+          <button class="primary" style="background:var(--green-ok); color:#fff;" onclick="submitAddFunds()">Add funds</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('app').appendChild(overlay);
+    const amtElAF = document.getElementById('amtInput');
+    amtElAF.focus();
+    amtElAF.oninput = (e) => { sheet.amount = e.target.value; };
+    document.getElementById('noteInput').oninput = (e) => { sheet.note = e.target.value; };
     return;
   }
 
@@ -928,6 +1303,262 @@ function renderSheet(){
   amtEl.focus();
   amtEl.oninput = (e) => { sheet.amount = e.target.value; };
   document.getElementById('noteInput').oninput = (e) => { sheet.note = e.target.value; };
+}
+
+function renderMonthTestSheetHtml(){
+  const rows = state.categories.map(c => {
+    const after = c.type === 'reset' ? c.amount : (c.balance || 0) + c.amount;
+    return `<div class="preview-row">
+      <span>${escapeHtml(c.name)}</span>
+      <span>${fmt(c.balance)} → <b>${fmt(after)}</b></span>
+    </div>`;
+  }).join('');
+  return `
+    <div class="sheet">
+      <h2>Simulate the 1st of the month?</h2>
+      <div class="warn-box">
+        <b>This runs the real monthly reset right now.</b>
+        It's the exact same thing that happens automatically on the 1st — resetting fixed funds and adding this month's amount to rollover funds. If any reset funds were underspent, you'll be asked how to divvy up the leftover afterward. This changes your actual balances, not a copy, and can't be undone automatically.
+      </div>
+      <div class="preview-list">${rows}</div>
+      <div class="sheet-actions">
+        <button class="ghost-dark" onclick="closeSheet()">Cancel</button>
+        <button class="primary" onclick="confirmMonthTest()">Yes, run it now</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderOverageSheetHtml(){
+  const cat = state.categories.find(c => c.id === sheet.categoryId);
+  if(!cat) return '';
+  const options = state.categories.filter(c => c.id !== sheet.categoryId);
+  const catButtons = options.map(c =>
+    `<button class="${sheet.backupId===c.id?'sel':''}" onclick="pickOverageBackup('${c.id}')">${escapeHtml(c.name)} <span style="opacity:.55">(${fmt(c.balance)})</span></button>`
+  ).join('');
+  return `
+    <div class="sheet">
+      <h2>This goes over budget</h2>
+      <div class="warn-box">
+        <b>${escapeHtml(cat.name)} only has ${fmt(cat.balance)} left</b>, but this purchase is ${fmt(sheet.amount)} — that's ${fmt(sheet.overage)} over. Pick a fund to cover the difference.
+      </div>
+      <div class="field">
+        <label>Cover the overage from</label>
+        <div class="cat-pick">${catButtons}</div>
+      </div>
+      ${sheet.error ? `<div class="err">${sheet.error}</div>` : ''}
+      <div class="sheet-actions">
+        <button class="ghost-dark" onclick="closeSheet()">Cancel purchase</button>
+        <button class="primary" onclick="confirmOverage()">Confirm</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderDeleteCatSheetHtml(){
+  const c = state.categories.find(c=>c.id===sheet.categoryId);
+  if(!c) return '';
+  const txCount = state.transactions.filter(t => t.categoryId === c.id).length;
+  const historyNote = txCount > 0
+    ? `Its ${txCount} logged ${txCount === 1 ? 'entry' : 'entries'} in History will stay, but will show as "Deleted fund" instead of "${escapeHtml(c.name)}".`
+    : `It has no logged entries yet.`;
+  return `
+    <div class="sheet">
+      <h2>Remove this fund?</h2>
+      <div class="warn-box">
+        <b>This can't be undone.</b>
+        "${escapeHtml(c.name)}" and its current balance of ${fmt(c.balance)} will be permanently removed. ${historyNote}
+      </div>
+      <div class="sheet-actions">
+        <button class="ghost-dark" onclick="closeSheet()">Cancel</button>
+        <button class="primary" style="background:var(--rust); color:#fff;" onclick="confirmDeleteCat()">Yes, remove fund</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderEditCatSheetHtml(){
+  const c = state.categories.find(c=>c.id===sheet.categoryId);
+  if(!c) return '';
+
+  if(sheet.confirming){
+    const newAmount = parseFloat(sheet.amount) || 0;
+    const rows = [];
+    if(sheet.name.trim() !== c.name){
+      rows.push(`<div class="preview-row"><span>Name</span><span>${escapeHtml(c.name)} → <b>${escapeHtml(sheet.name.trim())}</b></span></div>`);
+    }
+    if(newAmount !== c.amount){
+      rows.push(`<div class="preview-row"><span>Monthly amount</span><span>${fmt(c.amount)} → <b>${fmt(newAmount)}</b></span></div>`);
+    }
+    if(sheet.catType !== c.type){
+      const label = t => t === 'rollover' ? 'Rolls over' : 'Resets monthly';
+      rows.push(`<div class="preview-row"><span>Type</span><span>${label(c.type)} → <b>${label(sheet.catType)}</b></span></div>`);
+    }
+    return `
+      <div class="sheet">
+        <h2>Save these changes?</h2>
+        <div class="preview-list">${rows.join('')}</div>
+        <div class="sheet-actions">
+          <button class="ghost-dark" onclick="cancelConfirm()">Go back</button>
+          <button class="primary" onclick="commitEditCat()">Yes, save changes</button>
+        </div>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="sheet">
+      <h2>Edit fund</h2>
+      <div class="field">
+        <label>Fund name</label>
+        <input class="note-in" id="editNameInput" type="text" value="${escapeHtml(sheet.name)}">
+      </div>
+      <div class="field">
+        <label>Monthly amount</label>
+        <input class="amt-big" id="editAmtInput" type="number" inputmode="decimal" step="0.01" value="${sheet.amount}">
+      </div>
+      <div class="field">
+        <label>Type</label>
+        <div class="type-toggle">
+          <button class="${sheet.catType==='reset'?'on':''}" onclick="setEditCatType('reset')">Resets monthly</button>
+          <button class="${sheet.catType==='rollover'?'on':''}" onclick="setEditCatType('rollover')">Rolls over</button>
+        </div>
+      </div>
+      ${sheet.error ? `<div class="err">${sheet.error}</div>` : ''}
+      <div class="bal-row">
+        <div class="bal-current">Current balance: <b>${fmt(c.balance)}</b></div>
+        <button class="adjust-link" onclick="openAdjustSheet('${c.id}')">Adjust balance</button>
+      </div>
+      <div class="sheet-actions" style="margin-top:16px;">
+        <button class="ghost-dark" onclick="closeSheet()">Cancel</button>
+        <button class="primary" onclick="reviewEditCat()">Review changes</button>
+      </div>
+      <div style="text-align:center; margin-top:14px;">
+        <button class="del-cat" style="margin:0;" onclick="deleteCat('${c.id}')">Remove this fund</button>
+      </div>
+    </div>
+  `;
+}
+
+function setEditCatType(type){
+  sheet.catType = type;
+  renderSheet();
+}
+
+function reviewEditCat(){
+  const c = state.categories.find(c=>c.id===sheet.categoryId);
+  if(!c){ closeSheet(); return; }
+  const name = sheet.name.trim();
+  const amount = parseFloat(sheet.amount);
+  if(!name){ sheet.error = 'Give this fund a name.'; renderSheet(); return; }
+  if(isNaN(amount) || amount < 0){ sheet.error = 'Enter a valid monthly amount.'; renderSheet(); return; }
+  sheet.error = '';
+  if(name === c.name && amount === c.amount && sheet.catType === c.type){
+    // nothing changed, no need to confirm
+    closeSheet();
+    return;
+  }
+  sheet.confirming = true;
+  renderSheet();
+}
+
+function commitEditCat(){
+  const c = state.categories.find(c=>c.id===sheet.categoryId);
+  if(!c){ sheet = null; render(); return; }
+  c.name = sheet.name.trim();
+  c.amount = parseFloat(sheet.amount) || 0;
+  c.type = sheet.catType;
+  persist();
+  sheet = null;
+  render();
+}
+
+function renderEditTxSheetHtml(){
+  const tx = state.transactions.find(t => t.id === sheet.txId);
+  if(!tx) return '';
+  const cat = state.categories.find(c => c.id === tx.categoryId);
+  const catName = cat ? escapeHtml(cat.name) : 'Deleted fund';
+  const verb = tx.kind === 'deposit' ? 'added to' : 'spent from';
+
+  if(sheet.confirming){
+    const newAmt = parseFloat(sheet.amount) || 0;
+    const rows = [];
+    if(newAmt !== tx.amount){
+      rows.push(`<div class="preview-row"><span>Amount</span><span>${fmt(tx.amount)} → <b>${fmt(newAmt)}</b></span></div>`);
+    }
+    const newNote = sheet.note.trim();
+    if(newNote !== (tx.note || '')){
+      rows.push(`<div class="preview-row"><span>Note</span><span>${escapeHtml(tx.note || '(none)')} → <b>${escapeHtml(newNote || '(none)')}</b></span></div>`);
+    }
+    return `
+      <div class="sheet">
+        <h2>Save this correction?</h2>
+        <div class="warn-box">
+          <b>This updates ${catName}'s balance to match.</b>
+          The fund's balance will be adjusted by the difference between the old and new amount.
+        </div>
+        <div class="preview-list">${rows.join('')}</div>
+        <div class="sheet-actions">
+          <button class="ghost-dark" onclick="cancelConfirm()">Go back</button>
+          <button class="primary" onclick="commitEditTx()">Yes, save it</button>
+        </div>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="sheet">
+      <h2>Edit entry</h2>
+      <div class="field">
+        <label>${catName} — amount ${verb}</label>
+        <input class="amt-big" id="editTxAmtInput" type="number" inputmode="decimal" step="0.01" value="${sheet.amount}">
+      </div>
+      <div class="field">
+        <label>Note</label>
+        <input class="note-in" id="editTxNoteInput" type="text" value="${escapeHtml(sheet.note)}">
+      </div>
+      ${sheet.error ? `<div class="err">${sheet.error}</div>` : ''}
+      <div class="sheet-actions">
+        <button class="ghost-dark" onclick="closeSheet()">Cancel</button>
+        <button class="primary" onclick="reviewEditTx()">Review changes</button>
+      </div>
+    </div>
+  `;
+}
+
+function reviewEditTx(){
+  const tx = state.transactions.find(t => t.id === sheet.txId);
+  if(!tx){ closeSheet(); return; }
+  const amt = parseFloat(sheet.amount);
+  if(isNaN(amt) || amt <= 0){ sheet.error = 'Enter an amount greater than 0.'; renderSheet(); return; }
+  sheet.error = '';
+  const noteChanged = sheet.note.trim() !== (tx.note || '');
+  if(amt === tx.amount && !noteChanged){
+    closeSheet();
+    return;
+  }
+  sheet.confirming = true;
+  renderSheet();
+}
+
+function commitEditTx(){
+  const tx = state.transactions.find(t => t.id === sheet.txId);
+  if(!tx){ sheet = null; render(); return; }
+  const cat = state.categories.find(c => c.id === tx.categoryId);
+  const newAmt = parseFloat(sheet.amount) || 0;
+  const oldAmt = tx.amount;
+  if(cat){
+    if(tx.kind === 'deposit'){
+      cat.balance += (newAmt - oldAmt);
+    } else {
+      cat.balance += (oldAmt - newAmt);
+    }
+  }
+  tx.amount = newAmt;
+  tx.note = sheet.note.trim();
+  persist();
+  sheet = null;
+  render();
 }
 
 function renderAdjustSheetHtml(){
@@ -1006,11 +1637,158 @@ function submitLog(){
   if(!sheet.categoryId){ sheet.error = 'Add a fund first.'; renderSheet(); return; }
   if(isNaN(amt) || amt <= 0){ sheet.error = 'Enter an amount greater than 0.'; renderSheet(); return; }
   const cat = state.categories.find(c => c.id === sheet.categoryId);
+  const overage = amt - cat.balance;
+  const otherFunds = state.categories.filter(c => c.id !== cat.id);
+
+  if(overage > 0.004 && otherFunds.length > 0){
+    sheet = {
+      type: 'overage',
+      categoryId: cat.id,
+      amount: amt,
+      note: sheet.note,
+      overage: overage,
+      backupId: null,
+      error: ''
+    };
+    render();
+    return;
+  }
+
+  finalizePurchase(cat.id, amt, sheet.note);
+}
+
+function finalizePurchase(categoryId, amt, note){
+  const cat = state.categories.find(c => c.id === categoryId);
   cat.balance -= amt;
   state.transactions.push({
     id: uid(),
-    categoryId: sheet.categoryId,
+    categoryId,
     kind: 'purchase',
+    amount: amt,
+    note: (note || '').trim(),
+    date: new Date().toISOString()
+  });
+  persist();
+  sheet = null;
+  render();
+}
+
+function pickOverageBackup(id){ sheet.backupId = id; renderSheet(); }
+
+function confirmOverage(){
+  if(!sheet.backupId){ sheet.error = 'Pick a fund to cover the difference.'; renderSheet(); return; }
+  const primary = state.categories.find(c => c.id === sheet.categoryId);
+  const backup = state.categories.find(c => c.id === sheet.backupId);
+  if(!primary || !backup){ sheet = null; render(); return; }
+
+  const amt = sheet.amount;
+  const overage = sheet.overage;
+  const note = (sheet.note || '').trim();
+
+  primary.balance = 0; // fully used up by this purchase
+  backup.balance -= overage;
+
+  state.transactions.push({
+    id: uid(), categoryId: primary.id, kind: 'purchase', amount: amt, note, date: new Date().toISOString()
+  });
+  state.transactions.push({
+    id: uid(), categoryId: backup.id, kind: 'purchase', amount: overage,
+    note: `Covered overspend from ${primary.name}`, date: new Date().toISOString()
+  });
+
+  persist();
+  sheet = null;
+  render();
+}
+
+function renderLeftoverSheetHtml(){
+  const rolloverCats = state.categories.filter(c => c.type === 'rollover');
+  const allocated = rolloverCats.reduce((s,c) => s + (parseFloat(sheet.allocations[c.id]) || 0), 0);
+  const remaining = sheet.leftover - allocated;
+  const rows = rolloverCats.map(c => `
+    <div class="field" style="margin-bottom:10px;">
+      <label>${escapeHtml(c.name)} <span style="opacity:.6">(currently ${fmt(c.balance)})</span></label>
+      <input class="amt-input" style="width:100%;" type="number" step="0.01" inputmode="decimal"
+        data-catid="${c.id}" value="${sheet.allocations[c.id]}" oninput="updateLeftoverAlloc('${c.id}', this.value)">
+    </div>
+  `).join('');
+  return `
+    <div class="sheet">
+      <h2>Divvy up the leftover</h2>
+      <div class="warn-box" style="background:rgba(47,166,107,0.1); border-color:rgba(47,166,107,0.35); color:#1f7a4d;">
+        <b>You underspent by ${fmt(sheet.leftover)} this month</b> across your reset funds. Decide how to split it across your rollover funds as a reward — anything left unassigned won't be added anywhere.
+      </div>
+      ${rows}
+      <div style="display:flex; justify-content:space-between; font-size:13px; margin:10px 0 16px; color:${remaining<-0.004?'var(--rust)':'var(--ink-soft)'}">
+        <span>Remaining to assign</span>
+        <b>${fmt(remaining)}</b>
+      </div>
+      ${sheet.error ? `<div class="err">${sheet.error}</div>` : ''}
+      <div class="sheet-actions">
+        <button class="ghost-dark" onclick="splitLeftoverEvenly()">Split evenly</button>
+        <button class="primary" style="background:var(--green-ok); color:#fff;" onclick="confirmLeftover()">Add to funds</button>
+      </div>
+      <div style="text-align:center; margin-top:14px;">
+        <button class="preview-link" onclick="skipLeftover()">Skip for now</button>
+      </div>
+    </div>
+  `;
+}
+
+function updateLeftoverAlloc(id, val){
+  sheet.allocations[id] = val;
+}
+
+function splitLeftoverEvenly(){
+  const rolloverCats = state.categories.filter(c => c.type === 'rollover');
+  if(rolloverCats.length === 0) return;
+  const each = (sheet.leftover / rolloverCats.length);
+  rolloverCats.forEach(c => {
+    sheet.allocations[c.id] = each.toFixed(2);
+    const el = document.querySelector(`input[data-catid="${c.id}"]`);
+    if(el) el.value = each.toFixed(2);
+  });
+  sheet.error = '';
+}
+
+function confirmLeftover(){
+  const rolloverCats = state.categories.filter(c => c.type === 'rollover');
+  const allocated = rolloverCats.reduce((s,c) => s + (parseFloat(sheet.allocations[c.id]) || 0), 0);
+  if(allocated - sheet.leftover > 0.004){
+    sheet.error = "You've assigned more than the leftover amount.";
+    renderSheet();
+    return;
+  }
+  rolloverCats.forEach(c => {
+    const amt = parseFloat(sheet.allocations[c.id]) || 0;
+    if(amt > 0.004){
+      c.balance += amt;
+      state.transactions.push({
+        id: uid(), categoryId: c.id, kind: 'deposit', amount: amt,
+        note: 'Underspending reward from last month', date: new Date().toISOString()
+      });
+    }
+  });
+  persist();
+  sheet = null;
+  render();
+}
+
+function skipLeftover(){
+  sheet = null;
+  render();
+}
+
+function submitAddFunds(){
+  const amt = parseFloat(sheet.amount);
+  if(!sheet.categoryId){ sheet.error = 'Add a fund first.'; renderSheet(); return; }
+  if(isNaN(amt) || amt <= 0){ sheet.error = 'Enter an amount greater than 0.'; renderSheet(); return; }
+  const cat = state.categories.find(c => c.id === sheet.categoryId);
+  cat.balance += amt;
+  state.transactions.push({
+    id: uid(),
+    categoryId: sheet.categoryId,
+    kind: 'deposit',
     amount: amt,
     note: sheet.note.trim(),
     date: new Date().toISOString()
@@ -1027,6 +1805,8 @@ function deleteTx(id){
   if(cat){
     if(tx.kind === 'adjustment'){
       cat.balance -= tx.amount; // amount is a signed delta, so undo by subtracting it
+    } else if(tx.kind === 'deposit'){
+      cat.balance -= tx.amount; // deposits added money, so undo by subtracting it
     } else {
       cat.balance += tx.amount; // purchases store a positive spend amount
     }
@@ -1037,30 +1817,31 @@ function deleteTx(id){
 }
 
 /* ---------- Settings actions ---------- */
-function updateCatName(id, val){
+function deleteCat(id){
   const c = state.categories.find(c=>c.id===id);
-  if(c) c.name = val;
-  persist();
-}
-function updateCatAmount(id, val){
-  const c = state.categories.find(c=>c.id===id);
-  if(c) c.amount = parseFloat(val) || 0;
-  persist();
-}
-function updateCatType(id, type){
-  const c = state.categories.find(c=>c.id===id);
-  if(c) c.type = type;
-  persist();
+  if(!c) return;
+  sheet = { type:'delcat', categoryId: id };
   render();
 }
-function deleteCat(id){
-  state.categories = state.categories.filter(c=>c.id!==id);
+function confirmDeleteCat(){
+  state.categories = state.categories.filter(c=>c.id!==sheet.categoryId);
   persist();
+  sheet = null;
   render();
 }
 function addCategory(){
-  state.categories.push({ id: uid(), name: 'New Fund', type: 'rollover', amount: 0, balance: 0 });
+  const newCat = { id: uid(), name: 'New Fund', type: 'rollover', amount: 0, balance: 0 };
+  state.categories.push(newCat);
   persist();
+  openEditCatSheet(newCat.id);
+}
+function openMonthTestSheet(){
+  sheet = { type: 'monthtest' };
+  render();
+}
+function confirmMonthTest(){
+  sheet = null; // close this confirmation sheet first
+  applyMonthRollover(); // may open a new 'leftover' sheet if funds were underspent
   render();
 }
 
@@ -1070,7 +1851,34 @@ function escapeHtml(s){
   return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
 
+/* ---------- Swipe between Funds / History ---------- */
+function setupSwipe(){
+  const app = document.getElementById('app');
+  let startX = 0, startY = 0, tracking = false;
+
+  app.addEventListener('touchstart', (e) => {
+    if(sheet || settingsOpen || setupMode){ tracking = false; return; }
+    const t = e.touches[0];
+    startX = t.clientX;
+    startY = t.clientY;
+    tracking = true;
+  }, { passive: true });
+
+  app.addEventListener('touchend', (e) => {
+    if(!tracking) return;
+    tracking = false;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - startX;
+    const dy = t.clientY - startY;
+    const minDistance = 60;
+    if(Math.abs(dx) < minDistance || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    if(dx < 0 && activeTab === 'home') setTab('history');
+    else if(dx > 0 && activeTab === 'history') setTab('home');
+  }, { passive: true });
+}
+
 function init(){
+  setupSwipe();
   config = getConfig();
   if(!config){
     setupMode = true;
