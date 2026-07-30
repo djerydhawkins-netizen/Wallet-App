@@ -51,14 +51,10 @@
     gap:4px;
   }
   .eyebrow-row{
+    position:relative;
     display:flex;
     align-items:center;
     justify-content:space-between;
-  }
-  .header-left{
-    display:flex;
-    align-items:center;
-    gap:10px;
   }
   .logo-badge{
     width:44px;
@@ -75,6 +71,12 @@
     height:36px;
     width:auto;
     display:block;
+  }
+  h1.month{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform: translate(-50%, -50%);
   }
   .eyebrow{
     font-family:'IBM Plex Mono', monospace;
@@ -185,32 +187,47 @@
   /* ---- Tabs ---- */
   nav.tabs{
     display:flex;
-    gap:6px;
-    padding: 4px 20px 16px;
+    margin: 4px 20px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(247,244,238,0.25);
+    overflow:hidden;
   }
   nav.tabs button{
+    flex:1;
     font-family:'Inter', sans-serif;
     font-size:13px;
     font-weight:600;
-    padding:8px 14px;
-    border-radius:999px;
-    border:1px solid rgba(247,244,238,0.25);
+    padding:10px 14px;
+    border:none;
     background: transparent;
     color: rgba(247,244,238,0.7);
     cursor:pointer;
   }
+  nav.tabs button:first-child{
+    border-right: 1px solid rgba(247,244,238,0.25);
+  }
   nav.tabs button.active{
     background: var(--paper);
     color: var(--ink);
-    border-color: var(--paper);
   }
 
-  main{
+  main.tab-viewport{
     flex:1;
-    padding: 4px 16px 20px;
+    overflow:hidden;
+  }
+  .tab-track{
+    display:flex;
+    width:200%;
+    transition: transform 0.32s cubic-bezier(.4,0,.2,1);
+  }
+  .tab-panel{
+    width:50%;
+    flex-shrink:0;
+    box-sizing:border-box;
     display:flex;
     flex-direction:column;
     gap:16px;
+    padding: 4px 16px 20px;
   }
 
   /* ---- Envelope card (signature element) ---- */
@@ -349,6 +366,28 @@
     flex-shrink:0;
   }
   .pencil-btn:active{ background: rgba(28,39,51,0.12); }
+  .cat-reorder{
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+    flex-shrink:0;
+  }
+  .reorder-btn{
+    background: rgba(28,39,51,0.06);
+    border:1px solid rgba(28,39,51,0.12);
+    color: var(--ink-soft);
+    width:26px; height:20px;
+    border-radius:5px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    padding:0;
+  }
+  .reorder-btn:active{ background: rgba(28,39,51,0.12); }
+  .reorder-btn:disabled{
+    opacity:0.25;
+    cursor:default;
+  }
+  .reorder-btn:disabled:active{ background: rgba(28,39,51,0.06); }
   .cat-summary-bottom{
     display:flex;
     justify-content:space-between;
@@ -634,6 +673,7 @@ let state = {
   lastMonthProcessed: null
 };
 let activeTab = 'home';
+let trackPos = 'home'; // lags activeTab during the slide animation
 let settingsOpen = false;
 let sheet = null; // {type:'log'|'addcat', ...}
 let loaded = false;
@@ -660,7 +700,7 @@ function currentYM(){
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
 }
 function monthLabel(){
-  return new Date().toLocaleString('en-US', { month:'long', year:'numeric' });
+  return new Date().toLocaleString('en-US', { month:'long' });
 }
 function fmt(n){
   const neg = n < 0;
@@ -927,10 +967,8 @@ function render(){
   let html = '';
   html += `<header class="top">
     <div class="eyebrow-row">
-      <div class="header-left">
-        <div class="logo-badge"><img src="${LOGO_URI}" alt="" class="app-logo"></div>
-        <h1 class="month">${monthLabel()}</h1>
-      </div>
+      <div class="logo-badge"><img src="${LOGO_URI}" alt="" class="app-logo"></div>
+      <h1 class="month">${monthLabel()}</h1>
       <div class="header-right">
         <span id="syncBadge" class="sync-badge"></span>
         <button class="gear-btn" onclick="toggleSettings()" aria-label="Settings">${gearSvg()}</button>
@@ -943,10 +981,10 @@ function render(){
     <button class="${activeTab==='history'?'active':''}" onclick="setTab('history')">History</button>
   </nav>`;
 
-  html += `<main>`;
-  if(activeTab === 'home') html += renderHome();
-  if(activeTab === 'history') html += renderHistory();
-  html += `</main>`;
+  html += `<main class="tab-viewport"><div class="tab-track" id="tabTrack" style="transform:${trackPos==='home' ? 'translateX(0%)' : 'translateX(-50%)'}">
+    <div class="tab-panel">${renderHome()}</div>
+    <div class="tab-panel">${renderHistory()}</div>
+  </div></main>`;
 
   html += `<div class="fab"><button onclick="openAddFundsSheet()" aria-label="Add funds">+</button></div>`;
 
@@ -959,6 +997,14 @@ function render(){
 
 function pencilSvg(){
   return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg>`;
+}
+
+function chevronUpSvg(){
+  return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"></path></svg>`;
+}
+
+function chevronDownSvg(){
+  return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>`;
 }
 
 function gearSvg(){
@@ -1072,11 +1118,15 @@ function renderHistory(){
 }
 
 function renderSettings(){
-  let html = `<div class="month-note" style="padding-left:0; padding-bottom:2px;">Funds reset or roll over automatically on the 1st of each month, based on the monthly amount you set below. Tap the pencil to make changes.</div>`;
-  html += state.categories.map(c => `
+  let html = `<div class="month-note" style="padding-left:0; padding-bottom:2px;">Funds reset or roll over automatically on the 1st of each month, based on the monthly amount you set below. Tap the pencil to make changes, or use the arrows to reorder.</div>`;
+  html += state.categories.map((c, idx) => `
     <div class="settings-card cat-summary">
       <div class="cat-summary-top">
-        <div>
+        <div class="cat-reorder">
+          <button class="reorder-btn" onclick="moveCategory('${c.id}','up')" ${idx===0 ? 'disabled' : ''} aria-label="Move ${escapeHtml(c.name)} up">${chevronUpSvg()}</button>
+          <button class="reorder-btn" onclick="moveCategory('${c.id}','down')" ${idx===state.categories.length-1 ? 'disabled' : ''} aria-label="Move ${escapeHtml(c.name)} down">${chevronDownSvg()}</button>
+        </div>
+        <div style="flex:1;">
           <div class="env-name" style="font-size:16px;">${escapeHtml(c.name)}</div>
           <span class="env-type ${c.type}">${c.type === 'rollover' ? 'Rolls over' : 'Resets monthly'}</span>
         </div>
@@ -1130,7 +1180,7 @@ function openLogSheet(preselectId){
   render();
 }
 function openAddFundsSheet(preselectId){
-  sheet = { type:'addfunds', categoryId: preselectId || (state.categories[0] ? state.categories[0].id : null), amount: '', note: '', error: '' };
+  sheet = { type:'addfunds', categoryId: preselectId || null, amount: '', note: '', error: '' };
   render();
 }
 function openAdjustSheet(categoryId){
@@ -1781,7 +1831,7 @@ function skipLeftover(){
 
 function submitAddFunds(){
   const amt = parseFloat(sheet.amount);
-  if(!sheet.categoryId){ sheet.error = 'Add a fund first.'; renderSheet(); return; }
+  if(!sheet.categoryId){ sheet.error = 'Pick a fund first.'; renderSheet(); return; }
   if(isNaN(amt) || amt <= 0){ sheet.error = 'Enter an amount greater than 0.'; renderSheet(); return; }
   const cat = state.categories.find(c => c.id === sheet.categoryId);
   cat.balance += amt;
@@ -1835,6 +1885,17 @@ function addCategory(){
   persist();
   openEditCatSheet(newCat.id);
 }
+function moveCategory(id, direction){
+  const idx = state.categories.findIndex(c => c.id === id);
+  if(idx === -1) return;
+  const swapWith = direction === 'up' ? idx - 1 : idx + 1;
+  if(swapWith < 0 || swapWith >= state.categories.length) return;
+  const temp = state.categories[idx];
+  state.categories[idx] = state.categories[swapWith];
+  state.categories[swapWith] = temp;
+  persist();
+  render();
+}
 function openMonthTestSheet(){
   sheet = { type: 'monthtest' };
   render();
@@ -1845,7 +1906,19 @@ function confirmMonthTest(){
   render();
 }
 
-function setTab(t){ activeTab = t; sheet = null; render(); }
+function setTab(t){
+  if(t === activeTab) return;
+  activeTab = t;
+  sheet = null;
+  render(); // renders with trackPos still at the old position, so nothing jumps yet
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      trackPos = activeTab;
+      const track = document.getElementById('tabTrack');
+      if(track) track.style.transform = trackPos === 'home' ? 'translateX(0%)' : 'translateX(-50%)';
+    });
+  });
+}
 
 function escapeHtml(s){
   return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
