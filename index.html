@@ -77,6 +77,8 @@
     left:50%;
     top:50%;
     transform: translate(-50%, -50%);
+    z-index:2;
+    white-space:nowrap;
   }
   .eyebrow{
     font-family:'IBM Plex Mono', monospace;
@@ -90,6 +92,10 @@
     font-size:10px;
     letter-spacing:0.04em;
     color: rgba(247,244,238,0.45);
+    white-space:normal;
+    text-align:right;
+    max-width:88px;
+    line-height:1.3;
   }
   .sync-badge.saving{ color: var(--gold); }
   .sync-badge.saved{ color: rgba(247,244,238,0.45); }
@@ -107,6 +113,7 @@
     display:flex;
     align-items:center;
     gap:10px;
+    flex-shrink:0;
   }
   .gear-btn{
     background: rgba(247,244,238,0.12);
@@ -167,6 +174,12 @@
     font-size:30px;
     margin:0;
     letter-spacing:-0.01em;
+  }
+  .setup-title{
+    font-family:'Zilla Slab', serif;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    margin:0;
   }
   .total-row{
     margin-top:14px;
@@ -237,7 +250,7 @@
     color: var(--ink);
     border-radius: 0;
     margin: 0 -16px;
-    padding: 20px 18px 16px;
+    padding: 16px 18px 14px;
     cursor:pointer;
     overflow:hidden;
     border-top: 1px solid rgba(0,0,0,0.06);
@@ -279,12 +292,10 @@
   .env-balance.low{ color: var(--rust); }
 
   .env-bottom{
-    margin-top:14px;
+    margin-top:10px;
     display:flex;
     justify-content:space-between;
     align-items:center;
-    border-top: 1px dashed rgba(28,39,51,0.22);
-    padding-top:10px;
   }
   .env-budget{
     font-size:12px;
@@ -303,6 +314,12 @@
     border-radius:3px;
     background: var(--green-ok);
   }
+  .env-debt{
+    margin-top:8px;
+    font-size:11px;
+    color: var(--amber);
+    font-weight:600;
+  }
 
   .empty-state{
     text-align:center;
@@ -319,6 +336,33 @@
   }
 
   /* ---- History ---- */
+  .filter-chips{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding-bottom:2px;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .filter-chips::-webkit-scrollbar{ display:none; }
+  .filter-chip{
+    flex-shrink:0;
+    font-family:'Inter', sans-serif;
+    font-size:12px;
+    font-weight:600;
+    padding:7px 13px;
+    border-radius:999px;
+    border:1px solid rgba(247,244,238,0.25);
+    background:transparent;
+    color: rgba(247,244,238,0.7);
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .filter-chip.active{
+    background: var(--paper);
+    color: var(--ink);
+    border-color: var(--paper);
+  }
   .tx-row{
     background: var(--paper);
     color: var(--ink);
@@ -493,6 +537,7 @@
   .preview-row span:first-child{ color: var(--ink-soft); }
   .preview-row span:last-child{ font-family:'IBM Plex Mono', monospace; }
   .tx-amt.pos{ color: var(--green-ok); }
+  .tx-amt.borrow{ color: var(--amber); }
 
   button.primary{
     background: var(--gold);
@@ -645,9 +690,8 @@
   .setup-wrap{
     min-height:100vh;
     display:flex;
-    align-items:center;
     justify-content:center;
-    padding: 24px 20px;
+    padding: 56px 20px 24px;
   }
   .setup-card{
     background: var(--paper);
@@ -674,6 +718,7 @@ let state = {
 };
 let activeTab = 'home';
 let trackPos = 'home'; // lags activeTab during the slide animation
+let historyFilter = 'all';
 let settingsOpen = false;
 let sheet = null; // {type:'log'|'addcat', ...}
 let loaded = false;
@@ -736,7 +781,7 @@ function renderSetupScreen(){
     <div class="setup-wrap">
       <div class="setup-card">
         <div class="eyebrow" style="margin-bottom:6px;">Household Ledger</div>
-        <h1 class="month" style="font-size:24px; margin-bottom:10px;">Connect to your Google Sheet</h1>
+        <h1 class="setup-title" style="font-size:24px; margin-bottom:10px;">Connect to your Google Sheet</h1>
         <p style="font-size:13px; color:var(--ink-soft); line-height:1.5; margin-bottom:18px;">
           Paste the Web App URL and password from your Apps Script deployment. Both phones should use the exact same values.
         </p>
@@ -936,22 +981,41 @@ function processMonthRollover(){
 function applyMonthRollover(){
   let leftover = 0;
   state.categories.forEach(c => {
+    const owed = c.borrowed || 0;
     if(c.type === 'reset'){
       leftover += Math.max(0, c.balance);
-      c.balance = c.amount;
+      const effectiveAmount = Math.max(0, c.amount - owed);
+      c.balance = effectiveAmount;
+      c.borrowed = Math.max(0, owed - c.amount);
     } else {
-      c.balance = (c.balance || 0) + c.amount;
+      const effectiveAmount = c.amount - owed;
+      c.balance = (c.balance || 0) + effectiveAmount;
+      c.borrowed = Math.max(0, owed - c.amount);
     }
   });
   state.lastMonthProcessed = currentYM();
-  persist();
 
   const rolloverCats = state.categories.filter(c => c.type === 'rollover');
   if(leftover > 0.004 && rolloverCats.length > 0){
     const allocations = {};
     rolloverCats.forEach(c => { allocations[c.id] = ''; });
-    sheet = { type: 'leftover', leftover, allocations, error: '' };
+    state.pendingLeftover = { leftover, allocations };
   }
+  persist();
+
+  if(state.pendingLeftover){
+    openLeftoverSheet();
+  }
+}
+
+function openLeftoverSheet(){
+  if(!state.pendingLeftover) return;
+  sheet = { type: 'leftover', error: '' };
+}
+
+function openLeftoverSheetAndRender(){
+  openLeftoverSheet();
+  render();
 }
 
 function totalAvailable(){
@@ -1064,16 +1128,31 @@ function renderHome(){
         <div class="env-budget">of ${fmt(c.amount)}/mo</div>
         <div class="env-bar"><div class="env-bar-fill" style="width:${pct}%; background:${barColor}"></div></div>
       </div>
+      ${c.borrowed > 0.004 ? `<div class="env-debt">Owes ${fmt(c.borrowed)} to next month</div>` : ''}
     </div>`;
   }).join('');
 }
 
 function renderHistory(){
+  const filterChips = state.categories.length > 0 ? `<div class="filter-chips">
+    <button class="filter-chip ${historyFilter==='all'?'active':''}" onclick="setHistoryFilter('all')">All</button>
+    ${state.categories.map(c => `<button class="filter-chip ${historyFilter===c.id?'active':''}" onclick="setHistoryFilter('${c.id}')">${escapeHtml(c.name)}</button>`).join('')}
+  </div>` : '';
+
+  const filtered = historyFilter === 'all'
+    ? state.transactions
+    : state.transactions.filter(t => t.categoryId === historyFilter);
+
   if(state.transactions.length === 0){
     return `<div class="empty-state"><h2>Nothing logged yet</h2><p>Tap a fund to log a purchase, or use the + button to add funds.</p></div>`;
   }
-  const sorted = [...state.transactions].sort((a,b)=> b.date.localeCompare(a.date));
-  return sorted.map(t => {
+  if(filtered.length === 0){
+    const catName = state.categories.find(c => c.id === historyFilter);
+    return `${filterChips}<div class="empty-state"><h2>No entries yet</h2><p>Nothing logged for ${catName ? escapeHtml(catName.name) : 'this fund'} so far.</p></div>`;
+  }
+
+  const sorted = [...filtered].sort((a,b)=> b.date.localeCompare(a.date));
+  return filterChips + sorted.map(t => {
     const cat = state.categories.find(c => c.id === t.categoryId);
     const d = new Date(t.date);
     const catName = cat ? escapeHtml(cat.name) : 'Deleted fund';
@@ -1092,6 +1171,12 @@ function renderHistory(){
       amtDisplay = `+${fmt(t.amount)}`;
       amtClass = 'tx-amt pos';
       rowClass = 'deposit';
+    } else if(t.kind === 'borrow'){
+      label = `Borrowed ahead — ${catName}`;
+      noteLine = `<div class="tx-note">Next month's allotment will be ${fmt(t.amount)} lower</div>`;
+      amtDisplay = fmt(t.amount);
+      amtClass = 'tx-amt borrow';
+      rowClass = 'borrow';
     } else {
       label = catName;
       noteLine = t.note ? `<div class="tx-note">${escapeHtml(t.note)}</div>` : '';
@@ -1136,9 +1221,22 @@ function renderSettings(){
         <span>${fmt(c.amount)}/mo</span>
         <span>Balance: <b>${fmt(c.balance)}</b></span>
       </div>
+      ${c.borrowed > 0.004 ? `<div class="env-debt" style="margin-top:8px;">Owes ${fmt(c.borrowed)} to next month</div>` : ''}
     </div>
   `).join('');
   html += `<button class="add-cat-btn" onclick="addCategory()">＋ Add a fund</button>`;
+
+  if(state.pendingLeftover){
+    html += `<div class="settings-card" style="margin-top:22px; border:1px solid rgba(47,166,107,0.5);">
+      <div class="set-row"><div class="env-name" style="font-size:16px;">Leftover to divvy up</div></div>
+      <div style="font-size:12px; color:var(--ink-soft); margin-top:6px; line-height:1.5;">
+        You still have ${fmt(state.pendingLeftover.leftover)} from last month's underspending waiting to be split across your rollover funds.
+      </div>
+      <div style="margin-top:12px;">
+        <button class="ghost-dark" style="width:100%; border-color:var(--gold); color:#1f7a4d;" onclick="openLeftoverSheetAndRender()">Continue dividing it up</button>
+      </div>
+    </div>`;
+  }
 
   html += `<div class="settings-card" style="margin-top:22px;">
     <div class="set-row"><div class="env-name" style="font-size:16px;">Sync</div></div>
@@ -1160,15 +1258,17 @@ function renderSettings(){
     `}
   </div>`;
 
-  html += `<div class="settings-card" style="margin-top:10px;">
-    <div class="set-row"><div class="env-name" style="font-size:16px;">Testing tools</div></div>
-    <div style="font-size:12px; color:var(--ink-soft); margin-top:6px; line-height:1.5;">
-      Run the monthly reset/rollover right now, without waiting for the 1st, so you can check how each fund behaves. This uses your real balances${demoMode ? ' (currently just the preview data)' : ''}.
-    </div>
-    <div style="margin-top:12px;">
-      <button class="ghost-dark" style="width:100%;" onclick="openMonthTestSheet()">Simulate the 1st of the month</button>
-    </div>
-  </div>`;
+  if(demoMode){
+    html += `<div class="settings-card" style="margin-top:10px;">
+      <div class="set-row"><div class="env-name" style="font-size:16px;">Testing tools</div></div>
+      <div style="font-size:12px; color:var(--ink-soft); margin-top:6px; line-height:1.5;">
+        Run the monthly reset/rollover right now, without waiting for the 1st, so you can check how each fund behaves. This only affects this preview data — it's not available once connected to a real Google Sheet.
+      </div>
+      <div style="margin-top:12px;">
+        <button class="ghost-dark" style="width:100%;" onclick="openMonthTestSheet()">Simulate the 1st of the month</button>
+      </div>
+    </div>`;
+  }
   return html;
 }
 
@@ -1198,6 +1298,7 @@ function openEditCatSheet(categoryId){
     name: c.name,
     amount: String(c.amount),
     catType: c.type,
+    allowBorrow: c.allowBorrow !== false,
     error: '',
     confirming: false
   };
@@ -1357,10 +1458,13 @@ function renderSheet(){
 
 function renderMonthTestSheetHtml(){
   const rows = state.categories.map(c => {
-    const after = c.type === 'reset' ? c.amount : (c.balance || 0) + c.amount;
+    const owed = c.borrowed || 0;
+    const effectiveAmount = Math.max(0, c.amount - owed);
+    const after = c.type === 'reset' ? effectiveAmount : (c.balance || 0) + (c.amount - owed);
+    const debtNote = owed > 0.004 ? ` <span style="opacity:.6">(after paying back ${fmt(Math.min(owed, c.amount))} owed)</span>` : '';
     return `<div class="preview-row">
       <span>${escapeHtml(c.name)}</span>
-      <span>${fmt(c.balance)} → <b>${fmt(after)}</b></span>
+      <span>${fmt(c.balance)} → <b>${fmt(after)}</b>${debtNote}</span>
     </div>`;
   }).join('');
   return `
@@ -1386,16 +1490,28 @@ function renderOverageSheetHtml(){
   const catButtons = options.map(c =>
     `<button class="${sheet.backupId===c.id?'sel':''}" onclick="pickOverageBackup('${c.id}')">${escapeHtml(c.name)} <span style="opacity:.55">(${fmt(c.balance)})</span></button>`
   ).join('');
+  const borrowSel = sheet.backupId === '__borrow__' ? 'sel' : '';
+  const existingDebt = cat.borrowed || 0;
+  const canBorrow = cat.allowBorrow !== false;
   return `
     <div class="sheet">
       <h2>This goes over budget</h2>
       <div class="warn-box">
-        <b>${escapeHtml(cat.name)} only has ${fmt(cat.balance)} left</b>, but this purchase is ${fmt(sheet.amount)} — that's ${fmt(sheet.overage)} over. Pick a fund to cover the difference.
+        <b>${escapeHtml(cat.name)} only has ${fmt(cat.balance)} left</b>, but this purchase is ${fmt(sheet.amount)} — that's ${fmt(sheet.overage)} over. Pick how to cover the difference.
       </div>
       <div class="field">
         <label>Cover the overage from</label>
-        <div class="cat-pick">${catButtons}</div>
+        <div class="cat-pick">
+          ${canBorrow ? `<button class="${borrowSel}" onclick="pickOverageBackup('__borrow__')" style="${borrowSel ? 'background:var(--amber); border-color:var(--amber); color:#fff;' : ''}">Next month's ${escapeHtml(cat.name)} allotment</button>` : ''}
+          ${catButtons}
+        </div>
       </div>
+      ${sheet.backupId === '__borrow__' ? `
+        <div class="warn-box" style="background:rgba(204,122,46,0.1); border-color:rgba(204,122,46,0.35); color:#8a4f1c; margin-top:-2px;">
+          ${escapeHtml(cat.name)} will get ${fmt(sheet.overage)} less at the next monthly reset/rollover to pay this back.
+          ${existingDebt > 0.004 ? ` It already owes ${fmt(existingDebt)} from a previous month, so that'll become ${fmt(existingDebt + sheet.overage)} owed total.` : ''}
+        </div>
+      ` : ''}
       ${sheet.error ? `<div class="err">${sheet.error}</div>` : ''}
       <div class="sheet-actions">
         <button class="ghost-dark" onclick="closeSheet()">Cancel purchase</button>
@@ -1444,6 +1560,9 @@ function renderEditCatSheetHtml(){
       const label = t => t === 'rollover' ? 'Rolls over' : 'Resets monthly';
       rows.push(`<div class="preview-row"><span>Type</span><span>${label(c.type)} → <b>${label(sheet.catType)}</b></span></div>`);
     }
+    if(sheet.allowBorrow !== (c.allowBorrow !== false)){
+      rows.push(`<div class="preview-row"><span>Borrow from next month</span><span>${(c.allowBorrow !== false) ? 'Allowed' : 'Turned off'} → <b>${sheet.allowBorrow ? 'Allowed' : 'Turned off'}</b></span></div>`);
+    }
     return `
       <div class="sheet">
         <h2>Save these changes?</h2>
@@ -1474,11 +1593,20 @@ function renderEditCatSheetHtml(){
           <button class="${sheet.catType==='rollover'?'on':''}" onclick="setEditCatType('rollover')">Rolls over</button>
         </div>
       </div>
+      <div class="field">
+        <label>If this fund overspends</label>
+        <div class="type-toggle">
+          <button class="${sheet.allowBorrow?'on':''}" onclick="setEditCatBorrow(true)">Can borrow ahead</button>
+          <button class="${!sheet.allowBorrow?'on':''}" onclick="setEditCatBorrow(false)">Off</button>
+        </div>
+        <div class="month-note" style="padding:6px 0 0;">When on, overspending on this fund can pull from its own next month's allotment instead of another fund.</div>
+      </div>
       ${sheet.error ? `<div class="err">${sheet.error}</div>` : ''}
       <div class="bal-row">
         <div class="bal-current">Current balance: <b>${fmt(c.balance)}</b></div>
         <button class="adjust-link" onclick="openAdjustSheet('${c.id}')">Adjust balance</button>
       </div>
+      ${c.borrowed > 0.004 ? `<div class="env-debt" style="margin-top:2px;">Owes ${fmt(c.borrowed)} to next month (from a past overspend)</div>` : ''}
       <div class="sheet-actions" style="margin-top:16px;">
         <button class="ghost-dark" onclick="closeSheet()">Cancel</button>
         <button class="primary" onclick="reviewEditCat()">Review changes</button>
@@ -1495,6 +1623,11 @@ function setEditCatType(type){
   renderSheet();
 }
 
+function setEditCatBorrow(val){
+  sheet.allowBorrow = val;
+  renderSheet();
+}
+
 function reviewEditCat(){
   const c = state.categories.find(c=>c.id===sheet.categoryId);
   if(!c){ closeSheet(); return; }
@@ -1503,7 +1636,8 @@ function reviewEditCat(){
   if(!name){ sheet.error = 'Give this fund a name.'; renderSheet(); return; }
   if(isNaN(amount) || amount < 0){ sheet.error = 'Enter a valid monthly amount.'; renderSheet(); return; }
   sheet.error = '';
-  if(name === c.name && amount === c.amount && sheet.catType === c.type){
+  const currentAllowBorrow = c.allowBorrow !== false;
+  if(name === c.name && amount === c.amount && sheet.catType === c.type && sheet.allowBorrow === currentAllowBorrow){
     // nothing changed, no need to confirm
     closeSheet();
     return;
@@ -1518,6 +1652,7 @@ function commitEditCat(){
   c.name = sheet.name.trim();
   c.amount = parseFloat(sheet.amount) || 0;
   c.type = sheet.catType;
+  c.allowBorrow = sheet.allowBorrow;
   persist();
   sheet = null;
   render();
@@ -1688,9 +1823,10 @@ function submitLog(){
   if(isNaN(amt) || amt <= 0){ sheet.error = 'Enter an amount greater than 0.'; renderSheet(); return; }
   const cat = state.categories.find(c => c.id === sheet.categoryId);
   const overage = amt - cat.balance;
+  const canBorrow = cat.allowBorrow !== false;
   const otherFunds = state.categories.filter(c => c.id !== cat.id);
 
-  if(overage > 0.004 && otherFunds.length > 0){
+  if(overage > 0.004 && (canBorrow || otherFunds.length > 0)){
     sheet = {
       type: 'overage',
       categoryId: cat.id,
@@ -1726,14 +1862,35 @@ function finalizePurchase(categoryId, amt, note){
 function pickOverageBackup(id){ sheet.backupId = id; renderSheet(); }
 
 function confirmOverage(){
-  if(!sheet.backupId){ sheet.error = 'Pick a fund to cover the difference.'; renderSheet(); return; }
+  if(!sheet.backupId){ sheet.error = 'Pick how to cover the difference.'; renderSheet(); return; }
+
   const primary = state.categories.find(c => c.id === sheet.categoryId);
-  const backup = state.categories.find(c => c.id === sheet.backupId);
-  if(!primary || !backup){ sheet = null; render(); return; }
+  if(!primary){ sheet = null; render(); return; }
 
   const amt = sheet.amount;
   const overage = sheet.overage;
   const note = (sheet.note || '').trim();
+
+  if(sheet.backupId === '__borrow__'){
+    primary.balance = 0; // fully used up by this purchase
+    primary.borrowed = (primary.borrowed || 0) + overage;
+
+    state.transactions.push({
+      id: uid(), categoryId: primary.id, kind: 'purchase', amount: amt, note, date: new Date().toISOString()
+    });
+    state.transactions.push({
+      id: uid(), categoryId: primary.id, kind: 'borrow', amount: overage,
+      note: `Borrowed from next month's ${primary.name} allotment`, date: new Date().toISOString()
+    });
+
+    persist();
+    sheet = null;
+    render();
+    return;
+  }
+
+  const backup = state.categories.find(c => c.id === sheet.backupId);
+  if(!backup){ sheet = null; render(); return; }
 
   primary.balance = 0; // fully used up by this purchase
   backup.balance -= overage;
@@ -1752,26 +1909,28 @@ function confirmOverage(){
 }
 
 function renderLeftoverSheetHtml(){
+  const pending = state.pendingLeftover;
+  if(!pending) return '';
   const rolloverCats = state.categories.filter(c => c.type === 'rollover');
-  const allocated = rolloverCats.reduce((s,c) => s + (parseFloat(sheet.allocations[c.id]) || 0), 0);
-  const remaining = sheet.leftover - allocated;
+  const allocated = rolloverCats.reduce((s,c) => s + (parseFloat(pending.allocations[c.id]) || 0), 0);
+  const remaining = pending.leftover - allocated;
   const rows = rolloverCats.map(c => `
     <div class="field" style="margin-bottom:10px;">
       <label>${escapeHtml(c.name)} <span style="opacity:.6">(currently ${fmt(c.balance)})</span></label>
       <input class="amt-input" style="width:100%;" type="number" step="0.01" inputmode="decimal"
-        data-catid="${c.id}" value="${sheet.allocations[c.id]}" oninput="updateLeftoverAlloc('${c.id}', this.value)">
+        data-catid="${c.id}" value="${pending.allocations[c.id]}" oninput="updateLeftoverAlloc('${c.id}', this.value)">
     </div>
   `).join('');
   return `
     <div class="sheet">
       <h2>Divvy up the leftover</h2>
       <div class="warn-box" style="background:rgba(47,166,107,0.1); border-color:rgba(47,166,107,0.35); color:#1f7a4d;">
-        <b>You underspent by ${fmt(sheet.leftover)} this month</b> across your reset funds. Decide how to split it across your rollover funds as a reward — anything left unassigned won't be added anywhere.
+        <b>You underspent by ${fmt(pending.leftover)} this month</b> across your reset funds. Decide how to split it across your rollover funds as a reward — anything left unassigned won't be added anywhere.
       </div>
       ${rows}
-      <div style="display:flex; justify-content:space-between; font-size:13px; margin:10px 0 16px; color:${remaining<-0.004?'var(--rust)':'var(--ink-soft)'}">
+      <div id="leftoverRemainingRow" style="display:flex; justify-content:space-between; font-size:13px; margin:10px 0 16px; color:${remaining<-0.004?'var(--rust)':'var(--ink-soft)'}">
         <span>Remaining to assign</span>
-        <b>${fmt(remaining)}</b>
+        <b id="leftoverRemaining">${fmt(remaining)}</b>
       </div>
       ${sheet.error ? `<div class="err">${sheet.error}</div>` : ''}
       <div class="sheet-actions">
@@ -1779,38 +1938,56 @@ function renderLeftoverSheetHtml(){
         <button class="primary" style="background:var(--green-ok); color:#fff;" onclick="confirmLeftover()">Add to funds</button>
       </div>
       <div style="text-align:center; margin-top:14px;">
-        <button class="preview-link" onclick="skipLeftover()">Skip for now</button>
+        <button class="preview-link" onclick="skipLeftover()">Skip for now (ask me later)</button>
       </div>
     </div>
   `;
 }
 
+function updateLeftoverRemainingDisplay(){
+  const pending = state.pendingLeftover;
+  if(!pending) return;
+  const rolloverCats = state.categories.filter(c => c.type === 'rollover');
+  const allocated = rolloverCats.reduce((s,c) => s + (parseFloat(pending.allocations[c.id]) || 0), 0);
+  const remaining = pending.leftover - allocated;
+  const valEl = document.getElementById('leftoverRemaining');
+  const rowEl = document.getElementById('leftoverRemainingRow');
+  if(valEl) valEl.textContent = fmt(remaining);
+  if(rowEl) rowEl.style.color = remaining < -0.004 ? 'var(--rust)' : 'var(--ink-soft)';
+}
+
 function updateLeftoverAlloc(id, val){
-  sheet.allocations[id] = val;
+  state.pendingLeftover.allocations[id] = val;
+  updateLeftoverRemainingDisplay();
 }
 
 function splitLeftoverEvenly(){
+  const pending = state.pendingLeftover;
+  if(!pending) return;
   const rolloverCats = state.categories.filter(c => c.type === 'rollover');
   if(rolloverCats.length === 0) return;
-  const each = (sheet.leftover / rolloverCats.length);
+  const each = (pending.leftover / rolloverCats.length);
   rolloverCats.forEach(c => {
-    sheet.allocations[c.id] = each.toFixed(2);
+    pending.allocations[c.id] = each.toFixed(2);
     const el = document.querySelector(`input[data-catid="${c.id}"]`);
     if(el) el.value = each.toFixed(2);
   });
   sheet.error = '';
+  updateLeftoverRemainingDisplay();
 }
 
 function confirmLeftover(){
+  const pending = state.pendingLeftover;
+  if(!pending){ sheet = null; render(); return; }
   const rolloverCats = state.categories.filter(c => c.type === 'rollover');
-  const allocated = rolloverCats.reduce((s,c) => s + (parseFloat(sheet.allocations[c.id]) || 0), 0);
-  if(allocated - sheet.leftover > 0.004){
+  const allocated = rolloverCats.reduce((s,c) => s + (parseFloat(pending.allocations[c.id]) || 0), 0);
+  if(allocated - pending.leftover > 0.004){
     sheet.error = "You've assigned more than the leftover amount.";
     renderSheet();
     return;
   }
   rolloverCats.forEach(c => {
-    const amt = parseFloat(sheet.allocations[c.id]) || 0;
+    const amt = parseFloat(pending.allocations[c.id]) || 0;
     if(amt > 0.004){
       c.balance += amt;
       state.transactions.push({
@@ -1819,12 +1996,14 @@ function confirmLeftover(){
       });
     }
   });
+  state.pendingLeftover = null;
   persist();
   sheet = null;
   render();
 }
 
 function skipLeftover(){
+  // state.pendingLeftover is intentionally left in place so this can be reopened later from Settings
   sheet = null;
   render();
 }
@@ -1857,6 +2036,8 @@ function deleteTx(id){
       cat.balance -= tx.amount; // amount is a signed delta, so undo by subtracting it
     } else if(tx.kind === 'deposit'){
       cat.balance -= tx.amount; // deposits added money, so undo by subtracting it
+    } else if(tx.kind === 'borrow'){
+      cat.borrowed = Math.max(0, (cat.borrowed || 0) - tx.amount); // undo the future debt, balance is untouched
     } else {
       cat.balance += tx.amount; // purchases store a positive spend amount
     }
@@ -1874,13 +2055,14 @@ function deleteCat(id){
   render();
 }
 function confirmDeleteCat(){
+  if(historyFilter === sheet.categoryId) historyFilter = 'all';
   state.categories = state.categories.filter(c=>c.id!==sheet.categoryId);
   persist();
   sheet = null;
   render();
 }
 function addCategory(){
-  const newCat = { id: uid(), name: 'New Fund', type: 'rollover', amount: 0, balance: 0 };
+  const newCat = { id: uid(), name: 'New Fund', type: 'rollover', amount: 0, balance: 0, borrowed: 0, allowBorrow: true };
   state.categories.push(newCat);
   persist();
   openEditCatSheet(newCat.id);
@@ -1897,6 +2079,7 @@ function moveCategory(id, direction){
   render();
 }
 function openMonthTestSheet(){
+  if(!demoMode) return; // only available in preview mode, never on a live connected sheet
   sheet = { type: 'monthtest' };
   render();
 }
@@ -1918,6 +2101,11 @@ function setTab(t){
       if(track) track.style.transform = trackPos === 'home' ? 'translateX(0%)' : 'translateX(-50%)';
     });
   });
+}
+
+function setHistoryFilter(id){
+  historyFilter = id;
+  render();
 }
 
 function escapeHtml(s){
